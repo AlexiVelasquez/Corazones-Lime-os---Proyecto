@@ -1,59 +1,33 @@
-# Proyectocalidad
+# Corazones Limeños — Proyecto Calidad
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+Aplicación Angular que convierte las pantallas de referencia de Stitch en una experiencia funcional para donantes, albergues y administradores.
 
-## Development server
-
-To start a local development server, run:
+## Ejecutar
 
 ```bash
-ng serve
+npm install
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Abre `http://localhost:4200/`.
 
-## Code scaffolding
+## Usuarios de demostración
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Donante | `donante@calidad.pe` | `Demo123!` |
+| Albergue | `albergue@calidad.pe` | `Demo123!` |
+| Administrador | `admin@calidad.pe` | `Demo123!` |
 
-```bash
-ng generate component component-name
-```
+En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Funcionalidad incluida
 
-```bash
-ng generate --help
-```
+- Landing page, directorio filtrable, contacto y preguntas frecuentes.
+- Donación en tres pasos con validación, punto de entrega o recojo a domicilio.
+- Panel del donante con seguimiento e insignias.
+- Panel del albergue para publicar necesidades y confirmar recepciones.
+- Panel administrativo para aprobar albergues, asignar rutas y exportar CSV.
+- Perfil, preferencias, foto y cambio de contraseña.
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Los datos de esta versión de demostración se guardan en `localStorage`. No existe un backend ni se envían correos reales. Para reiniciar los datos, borra el almacenamiento del sitio desde el navegador.

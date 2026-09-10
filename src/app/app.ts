@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Store } from './store';
 
 @Component({
   imports: [RouterOutlet],
@@ -8,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly title = signal('Proyectocalidad');
+  readonly store = inject(Store);
 }
