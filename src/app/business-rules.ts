@@ -1,0 +1,98 @@
+export type DeliveryMethod = 'dropoff' | 'pickup';
+export type DonationStatus = 'Pendiente' | 'En tránsito' | 'Entregado';
+export type UserRole = 'donante' | 'albergue' | 'admin';
+
+export interface DonationFormData {
+  category: string;
+  description: string;
+  quantity: number;
+  method: string;
+  district: string;
+  address: string;
+  time: string;
+  shelter: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  message: string;
+}
+
+const valid = (): ValidationResult => ({ valid: true, message: '' });
+const invalid = (message: string): ValidationResult => ({ valid: false, message });
+
+/** Reglas puras del flujo de donación. No dependen de Angular ni del navegador. */
+export class DonationRules {
+  static readonly categories = ['Juguetes', 'Víveres'];
+
+  static validateCategory(category: string): ValidationResult {
+    return this.categories.includes(category)
+      ? valid()
+      : invalid('Selecciona Juguetes o Víveres para continuar.');
+  }
+
+  static validateDetails(description: string, quantity: number): ValidationResult {
+    if (description.trim().length < 5) {
+      return invalid('Describe tus artículos con al menos 5 caracteres.');
+    }
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 1000) {
+      return invalid('La cantidad debe ser un número entero entre 1 y 1000 cajas.');
+    }
+    return valid();
+  }
+
+  static validateDelivery(data: Pick<DonationFormData, 'method' | 'district' | 'address' | 'time'>): ValidationResult {
+    if (data.method === 'dropoff') {
+      return data.district.trim() ? valid() : invalid('Selecciona un punto de recojo.');
+    }
+    if (data.method === 'pickup') {
+      return data.address.trim().length >= 8 && Boolean(data.time)
+        ? valid()
+        : invalid('Completa la dirección y el horario de recojo.');
+    }
+    return invalid('Selecciona un método de entrega válido.');
+  }
+
+  static validateSubmission(data: DonationFormData, approvedShelterIds: string[]): ValidationResult {
+    const category = this.validateCategory(data.category);
+    if (!category.valid) return category;
+    const details = this.validateDetails(data.description, data.quantity);
+    if (!details.valid) return details;
+    const delivery = this.validateDelivery(data);
+    if (!delivery.valid) return delivery;
+    return approvedShelterIds.includes(data.shelter)
+      ? valid()
+      : invalid('Selecciona un albergue aprobado.');
+  }
+
+  static clampQuantity(quantity: number): number {
+    return Math.max(1, Math.min(1000, quantity));
+  }
+}
+
+/** Reglas para los cambios de estado según el rol que ejecuta la acción. */
+export class DonationStatusRules {
+  static transition(status: DonationStatus, role: UserRole): DonationStatus {
+    if (role === 'admin' && status === 'Pendiente') return 'En tránsito';
+    if (role === 'albergue' && status === 'En tránsito') return 'Entregado';
+    return status;
+  }
+}
+
+/** Validaciones reutilizables del perfil y seguridad. */
+export class ProfileRules {
+  static isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  static isValidPhone(phone: string): boolean {
+    return /^\+?[\d\s]{9,15}$/.test(phone.trim());
+  }
+
+  static validatePasswordChange(current: string, stored: string, next: string, repeat: string): ValidationResult {
+    if (current !== stored) return invalid('La contraseña actual no es correcta.');
+    if (next.length < 8) return invalid('La nueva contraseña debe tener al menos 8 caracteres.');
+    if (next !== repeat) return invalid('Las contraseñas nuevas no coinciden.');
+    return valid();
+  }
+}

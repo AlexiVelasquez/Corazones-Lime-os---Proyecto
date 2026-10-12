@@ -11,12 +11,34 @@ npm start
 
 Abre `http://localhost:4200/`.
 
+## Ejecutar sin instalar Angular ni usar internet
+
+El repositorio incluye una versión compilada en `portable/`. En cualquier
+computadora Windows:
+
+1. Descarga o copia el repositorio.
+2. Abre la carpeta `portable`.
+3. Haz doble clic en `iniciar.bat`.
+
+El sistema abrirá `http://127.0.0.1:8080/` y funcionará sin Angular CLI,
+Node.js, `npm install` ni conexión a internet. Debe copiarse la carpeta
+`portable` completa; no se debe abrir `app/index.html` directamente.
+
+Cuando se modifique el código fuente, la versión portable se actualiza desde
+una computadora de desarrollo con:
+
+```bash
+npm run build:portable
+```
+
 ## Usuarios de demostración
 
 | Rol | Correo | Contraseña |
 |---|---|---|
 | Donante | `donante@calidad.pe` | `Demo123!` |
-| Albergue | `albergue@calidad.pe` | `Demo123!` |
+| Hogar de la Esperanza | `albergue@calidad.pe` | `Demo123!` |
+| Patitas Felices | `patitas@calidad.pe` | `Demo123!` |
+| Renacer - Adulto Mayor | `renacer@calidad.pe` | `Demo123!` |
 | Administrador | `admin@calidad.pe` | `Demo123!` |
 
 En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
@@ -31,3 +53,11 @@ En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
 - Perfil, preferencias, foto y cambio de contraseña.
 
 Los datos de esta versión de demostración se guardan en `localStorage`. No existe un backend ni se envían correos reales. Para reiniciar los datos, borra el almacenamiento del sitio desde el navegador.
+
+## Pruebas unitarias
+
+```bash
+npm run test:unit
+```
+
+Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/app/business-rules.spec.ts`. La documentación IEEE 829 se encuentra en `docs/pruebas-unitarias-ieee829.md`.

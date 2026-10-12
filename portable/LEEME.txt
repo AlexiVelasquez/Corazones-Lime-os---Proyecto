@@ -1,0 +1,23 @@
+CORAZONES LIMEÑOS - VERSIÓN PORTABLE
+====================================
+
+Esta carpeta permite presentar el sistema en una computadora Windows sin
+instalar Angular CLI, Node.js ni paquetes de internet.
+
+INSTRUCCIONES
+
+1. Copia la carpeta "portable" completa a la computadora.
+2. Haz doble clic en "iniciar.bat".
+3. El navegador abrirá http://127.0.0.1:8080/ automáticamente.
+4. Para detener el sistema, presiona Ctrl+C o cierra la ventana negra.
+
+Si Windows pregunta con qué programa abrir el archivo, ejecuta iniciar.bat,
+no abras app\index.html directamente.
+
+CUENTAS DE DEMOSTRACIÓN
+
+Donante:       donante@calidad.pe / Demo123!
+Albergue 1:    albergue@calidad.pe / Demo123!
+Albergue 2:    patitas@calidad.pe / Demo123!
+Albergue 3:    renacer@calidad.pe / Demo123!
+Administrador: admin@calidad.pe / Demo123!

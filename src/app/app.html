@@ -1,9 +1,9 @@
 <router-outlet />
 <button class="theme-toggle" (click)="store.toggleTheme()" [attr.aria-label]="store.darkMode() ? 'Activar modo claro' : 'Activar modo oscuro'" [title]="store.darkMode() ? 'Modo claro' : 'Modo oscuro'">
-  <span class="material-symbols-outlined">{{ store.darkMode() ? 'light_mode' : 'dark_mode' }}</span>
+  <span class="material-symbols-outlined" aria-hidden="true">{{ store.darkMode() ? '☀' : '☾' }}</span>
 </button>
 @if (store.message()) {
   <button class="toast" (click)="store.message.set('')" aria-label="Cerrar mensaje">
-    <span class="material-symbols-outlined">check_circle</span>{{ store.message() }}<span class="material-symbols-outlined">close</span>
+    <span class="material-symbols-outlined" aria-hidden="true">✓</span>{{ store.message() }}<span class="material-symbols-outlined" aria-hidden="true">×</span>
   </button>
 }

@@ -8,6 +8,8 @@ export interface Shelter { id: string; name: string; district: string; status: '
 export const ACCOUNTS: Account[] = [
   { id: 'carlos', role: 'donante', name: 'Carlos', surname: 'Mendoza', email: 'donante@calidad.pe', phone: '987654321', district: 'Miraflores', password: 'Demo123!', notifications: [true, true, false] },
   { id: 'esperanza', role: 'albergue', name: 'Hogar de la Esperanza', surname: '', email: 'albergue@calidad.pe', phone: '987654322', district: 'San Juan de Lurigancho', password: 'Demo123!', notifications: [true, true, false] },
+  { id: 'patitas', role: 'albergue', name: 'Patitas Felices', surname: '', email: 'patitas@calidad.pe', phone: '987654324', district: 'Villa El Salvador', password: 'Demo123!', notifications: [true, true, false] },
+  { id: 'renacer', role: 'albergue', name: 'Renacer - Adulto Mayor', surname: '', email: 'renacer@calidad.pe', phone: '987654325', district: 'Comas', password: 'Demo123!', notifications: [true, true, false] },
   { id: 'admin', role: 'admin', name: 'María', surname: 'García', email: 'admin@calidad.pe', phone: '987654323', district: 'San Isidro', password: 'Demo123!', notifications: [true, true, false] }
 ];
 export const blankDraft = () => ({ category: '', description: '', quantity: 1, condition: 'nuevo', method: 'dropoff', district: '', address: '', reference: '', time: '', shelter: 'esperanza' });
@@ -36,7 +38,13 @@ export class Store {
   ]);
   messages = this.read<{name: string; email: string; subject: string; message: string; date: string}[]>('messages', []);
   draft = this.read('draft', blankDraft());
-  constructor() { this.applyTheme(); }
+  constructor() {
+    for (const account of ACCOUNTS) {
+      if (!this.accounts.some(saved => saved.id === account.id)) this.accounts.push(structuredClone(account));
+    }
+    this.save();
+    this.applyTheme();
+  }
   get user() { return this.accounts.find(a => a.id === this.userId); }
   get panel() { return '/panel/' + (this.user?.role ?? 'donante'); }
   get ownDonations() { return this.donations.filter(d => d.donor === this.userId); }
