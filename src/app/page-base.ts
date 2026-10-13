@@ -37,11 +37,13 @@ export class PageBase {
     const submission = DonationRules.validateSubmission(d, this.s.approvedShelters.map(shelter => shelter.id));
     if (!submission.valid) { this.s.notify(submission.message); return; }
     const id = 'CL-' + Date.now().toString().slice(-8);
-    this.s.donations.unshift({ ...d, id, donor: this.s.user.id, donorName: this.s.user.name + ' ' + this.s.user.surname, date: new Date().toISOString().slice(0,10), status: 'Pendiente' });
+    const donation = { ...d, id, donor: this.s.user.id, donorName: this.s.user.name + ' ' + this.s.user.surname, date: new Date().toISOString().slice(0,10), status: 'Pendiente' as const };
+    this.s.donations.unshift(donation);
+    this.s.persistDonation(donation);
     this.s.draft = blankDraft(); this.s.save(); this.s.notify('¡Gracias! Tu donación ' + id + ' fue registrada. Puedes seguirla aquí.'); this.go(this.s.panel);
   }
-  login() {
-    if (!this.s.login(this.email, this.password)) { this.loginError = 'Correo o contraseña incorrectos.'; return; }
+  async login() {
+    if (!await this.s.login(this.email, this.password)) { this.loginError = 'Correo o contraseña incorrectos.'; return; }
     const dest = new URLSearchParams(location.search).get('returnUrl');
     this.go(dest === '/donar/entrega' && this.s.user?.role === 'donante' ? dest : this.s.panel);
   }
@@ -49,20 +51,21 @@ export class PageBase {
   publish() {
     if (this.s.user?.role !== 'albergue') return;
     if (this.need.description.trim().length < 5) { this.s.notify('Describe la necesidad con al menos 5 caracteres.'); return; }
-    this.s.needs.unshift({ ...this.need, description: this.need.description.trim(), id: 'N' + Date.now(), shelter: this.s.user.id, active: true }); this.need.description = ''; this.s.save(); this.s.notify('Necesidad publicada. Ya es visible en el directorio.');
+    const need = { ...this.need, description: this.need.description.trim(), id: 'N' + Date.now(), shelter: this.s.user.id, active: true };
+    this.s.needs.unshift(need); this.s.persistNeed(need); this.need.description = ''; this.s.save(); this.s.notify('Necesidad publicada. Ya es visible en el directorio.');
   }
-  closeNeed(id: string) { const n = this.s.needs.find(n => n.id === id && n.shelter === this.s.userId); if(n) { n.active = false; this.s.save(); } }
-  receive(id: string) { const d = this.s.donations.find(d => d.id === id && d.shelter === this.s.userId); if (d && this.s.user?.role === 'albergue') { const next = DonationStatusRules.transition(d.status, 'albergue'); if (next !== d.status) { d.status = next; this.s.save(); this.s.notify('Recepción confirmada. El donante ya puede ver la entrega.'); } } }
-  dispatch(id: string) { const d = this.s.donations.find(d => d.id === id); if (d && this.s.user?.role === 'admin') { const next = DonationStatusRules.transition(d.status, 'admin'); if (next !== d.status) { d.status = next; this.s.save(); this.s.notify('Donación asignada a la ruta de entrega.'); } } }
-  approve(id: string, approved: boolean) { const shelter = this.s.shelters.find(a => a.id === id); if (shelter && this.s.user?.role === 'admin') { shelter.status = approved ? 'Aprobado' : 'Rechazado'; this.s.save(); this.s.notify(approved ? 'Albergue aprobado y añadido al directorio.' : 'Solicitud rechazada.'); } }
+  closeNeed(id: string) { const n = this.s.needs.find(n => n.id === id && n.shelter === this.s.userId); if(n) { n.active = false; this.s.persistNeedStatus(id, false); this.s.save(); } }
+  receive(id: string) { const d = this.s.donations.find(d => d.id === id && d.shelter === this.s.userId); if (d && this.s.user?.role === 'albergue') { const next = DonationStatusRules.transition(d.status, 'albergue'); if (next !== d.status) { d.status = next; this.s.persistDonationStatus(id, next); this.s.save(); this.s.notify('Recepción confirmada. El donante ya puede ver la entrega.'); } } }
+  dispatch(id: string) { const d = this.s.donations.find(d => d.id === id); if (d && this.s.user?.role === 'admin') { const next = DonationStatusRules.transition(d.status, 'admin'); if (next !== d.status) { d.status = next; this.s.persistDonationStatus(id, next); this.s.save(); this.s.notify('Donación asignada a la ruta de entrega.'); } } }
+  approve(id: string, approved: boolean) { const shelter = this.s.shelters.find(a => a.id === id); if (shelter && this.s.user?.role === 'admin') { shelter.status = approved ? 'Aprobado' : 'Rechazado'; this.s.persistShelterStatus(id, shelter.status); this.s.save(); this.s.notify(approved ? 'Albergue aprobado y añadido al directorio.' : 'Solicitud rechazada.'); } }
   matches(index: number) { const a = this.s.shelters[index]; return (this.district === 'Todos' || a.district === this.district) && a.name.toLowerCase().includes(this.search.toLowerCase()); }
-  sendContact() { if (!this.contact.name.trim() || !ProfileRules.isValidEmail(this.contact.email) || this.contact.message.trim().length < 10) { this.s.notify('Completa tu nombre, un correo válido y un mensaje de al menos 10 caracteres.'); return; } this.s.messages.push({ ...this.contact, date: new Date().toISOString() }); this.s.save(); this.contact.message = ''; this.s.notify('Mensaje guardado en la bandeja local de demostración. No se ha enviado un correo.'); }
+  sendContact() { if (!this.contact.name.trim() || !ProfileRules.isValidEmail(this.contact.email) || this.contact.message.trim().length < 10) { this.s.notify('Completa tu nombre, un correo válido y un mensaje de al menos 10 caracteres.'); return; } const message = { ...this.contact }; this.s.messages.push({ ...message, date: new Date().toISOString() }); this.s.persistMessage(message); this.s.save(); this.contact.message = ''; this.s.notify('Mensaje registrado correctamente.'); }
   saveProfile() {
     if (!this.s.user || !this.profile.name?.trim() || !ProfileRules.isValidEmail(this.profile.email ?? '') || !ProfileRules.isValidPhone(this.profile.phone ?? '')) { this.s.notify('Revisa tu nombre, correo y teléfono (9 a 15 dígitos).'); return; }
     if (this.s.accounts.some(a => a.id !== this.s.userId && a.email.toLowerCase() === this.profile.email?.toLowerCase())) { this.s.notify('Ese correo ya pertenece a otra cuenta.'); return; }
-    Object.assign(this.s.user, this.profile); this.s.save(); this.s.notify('Perfil y preferencias guardados.');
+    Object.assign(this.s.user, this.profile); this.s.persistProfile(this.s.user); this.s.save(); this.s.notify('Perfil y preferencias guardados.');
   }
-  changePassword() { if (!this.s.user) return; const result = ProfileRules.validatePasswordChange(this.currentPassword, this.s.user.password, this.newPassword, this.repeatPassword); if (!result.valid) { this.s.notify(result.message); return; } this.s.user.password = this.newPassword; this.profile.password = this.newPassword; this.s.save(); this.currentPassword = this.newPassword = this.repeatPassword = ''; this.s.notify('Contraseña de demostración actualizada.'); }
+  async changePassword() { if (!this.s.user) return; const result = ProfileRules.validatePasswordChange(this.currentPassword, this.s.user.password, this.newPassword, this.repeatPassword); if (!result.valid) { this.s.notify(result.message); return; } if (this.s.databaseConnected() && !await this.s.persistPassword(this.currentPassword, this.newPassword)) { this.s.notify('MySQL rechazó el cambio de contraseña.'); return; } this.s.user.password = this.newPassword; this.profile.password = this.newPassword; this.s.save(); this.currentPassword = this.newPassword = this.repeatPassword = ''; this.s.notify('Contraseña actualizada.'); }
   async photo(event: Event) { const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return; if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 500000) { this.s.notify('Selecciona una imagen JPG, PNG o WebP menor a 500 KB.'); return; } const reader = new FileReader(); reader.onload = () => { this.profile.photo = String(reader.result); this.s.notify('Foto seleccionada. Guarda los cambios para conservarla.'); }; reader.readAsDataURL(file); }
   exportReport() { const rows = [['ID','Fecha','Donante','Albergue','Categoría','Cajas','Estado'], ...this.s.donations.map(d => [d.id,d.date,d.donorName,this.s.shelterName(d.shelter),d.category,String(d.quantity),d.status])]; const csv = rows.map(r => r.map(v => '"' + (/^[=+@-]/.test(v) ? "'" : '') + v.replace(/"/g,'""') + '"').join(',')).join('\r\n'); const url = URL.createObjectURL(new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href = url; a.download = 'donaciones-calidad.csv'; a.click(); URL.revokeObjectURL(url); }
 }

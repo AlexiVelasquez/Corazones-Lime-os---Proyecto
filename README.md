@@ -77,3 +77,24 @@ npm run test:unit
 ```
 
 Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/app/business-rules.spec.ts`. La documentación IEEE 829 se encuentra en `docs/pruebas-unitarias-ieee829.md`.
+
+## MySQL y MySQL Workbench
+
+La base de datos se encuentra en `database/corazones_limenos.sql`. Incluye las
+tablas de usuarios, albergues, donaciones, necesidades y mensajes, además de
+las cuentas de demostración.
+
+1. Inicia el servicio MySQL.
+2. En MySQL Workbench selecciona **File > Open SQL Script**.
+3. Abre `database/corazones_limenos.sql` y ejecuta todo el script.
+4. Si tu usuario `root` tiene contraseña, copia
+   `backend/config.local.php.example` como `backend/config.local.php` y coloca
+   ahí tus credenciales.
+5. Ejecuta `INICIAR_CON_BASE_DE_DATOS.bat`.
+
+La aplicación se abre en `http://127.0.0.1:8080/` y la API PHP en
+`http://127.0.0.1:8081/api.php`. Cuando la conexión está activa aparece el
+indicador **MySQL conectado**. Si MySQL está apagado, el frontend conserva el
+modo local para que la demostración siga funcionando.
+
+Las instrucciones detalladas están en `database/IMPORTAR_EN_WORKBENCH.md`.

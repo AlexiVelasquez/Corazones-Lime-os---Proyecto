@@ -1,4 +1,7 @@
 <router-outlet />
+@if (store.databaseConnected()) {
+  <span class="database-status" title="Los datos se están guardando en MySQL">● MySQL conectado</span>
+}
 <button class="theme-toggle" (click)="store.toggleTheme()" [attr.aria-label]="store.darkMode() ? 'Activar modo claro' : 'Activar modo oscuro'" [title]="store.darkMode() ? 'Modo claro' : 'Modo oscuro'">
   <span class="material-symbols-outlined" aria-hidden="true">{{ store.darkMode() ? '☀' : '☾' }}</span>
 </button>
