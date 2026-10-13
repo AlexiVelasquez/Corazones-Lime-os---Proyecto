@@ -34,6 +34,11 @@ VBoxManage modifyvm "Kali Linux" --nat-localhostreachable1 on
 Este inicio publica el frontend en el puerto `8080` y la API en el `8081`.
 MySQL continúa limitado al equipo Windows y no necesita exponerse a Kali.
 
+La configuración IPv4 también está declarada en `angular.json`: Angular CLI
+escucha en `0.0.0.0:4200`. Si se inicia con `npm run start:ipv4`, desde Kali se
+usa la IPv4 de Windows seguida de `:4200`. El modo portable para ZAP continúa
+usando el puerto `8080`.
+
 ## 3. Comprobar la conexión desde Kali
 
 En la terminal de Kali ejecuta:

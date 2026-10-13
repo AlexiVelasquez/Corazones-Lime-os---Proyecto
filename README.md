@@ -11,6 +11,12 @@ npm start
 
 Abre `http://localhost:4200/`.
 
+El servidor de desarrollo está configurado en `angular.json` con
+`host: 0.0.0.0` y `port: 4200`. Esto fuerza la escucha mediante IPv4 en todas
+las interfaces. Desde otra computadora o Kali se debe usar la IPv4 de Windows,
+por ejemplo `http://10.242.146.148:4200/`; `0.0.0.0` no se escribe en el
+navegador.
+
 ## Ejecutar sin instalar Angular ni usar internet
 
 El repositorio incluye una versión compilada en `portable/`. En cualquier

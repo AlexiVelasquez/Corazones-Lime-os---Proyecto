@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:ipv4": "ng serve --configuration development",
     "build": "ng build",
     "build:portable": "ng build && node tools/build-portable.mjs",
     "watch": "ng build --watch --configuration development",
