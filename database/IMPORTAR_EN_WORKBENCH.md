@@ -19,11 +19,29 @@ sus valores. Ese archivo está excluido de Git para no publicar credenciales.
 
 ## Tablas
 
-- `usuarios`: cuentas de donante, albergue y administrador.
-- `albergues`: directorio y estado de aprobación.
-- `donaciones`: artículos, entrega, destino y seguimiento.
-- `necesidades`: solicitudes publicadas por cada albergue.
-- `mensajes_contacto`: consultas registradas desde la página de contacto.
+El modelo contiene **22 tablas relacionadas**:
+
+- Seguridad y catálogos: `roles`, `distritos`, `usuarios` y
+  `categorias_articulo`.
+- Albergues: `albergues`, `documentos_albergue` y `necesidades`.
+- Donaciones: `donaciones`, `detalle_donacion` y
+  `seguimiento_donacion`.
+- Campañas: `campanas` y `campana_albergues`.
+- Logística: `puntos_recojo`, `voluntarios`, `rutas_recojo` y
+  `ruta_donaciones`.
+- Impacto: `insignias`, `usuario_insignias` y `notificaciones`.
+- Gestión: `aliados_corporativos`, `mensajes_contacto` y
+  `auditoria_sistema`.
+
+Para comprobar la cantidad desde Workbench, ejecuta:
+
+```sql
+SELECT COUNT(*) AS total_tablas
+FROM information_schema.tables
+WHERE table_schema = 'corazones_limenos';
+```
+
+El resultado debe ser `22`.
 
 ## Comprobar la API
 

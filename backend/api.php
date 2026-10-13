@@ -63,12 +63,35 @@ function account_row(array $row): array
     ];
 }
 
+function category_id(PDO $db, string $name): int
+{
+    $statement = $db->prepare('SELECT id FROM categorias_articulo WHERE nombre = :nombre AND activo = 1');
+    $statement->execute(['nombre' => trim($name)]);
+    $id = $statement->fetchColumn();
+    if ($id === false) {
+        respond(['error' => 'La categoría seleccionada no existe.'], 422);
+    }
+    return (int) $id;
+}
+
+function district_id(PDO $db, string $name): ?int
+{
+    $statement = $db->prepare('SELECT id FROM distritos WHERE nombre = :nombre AND activo = 1');
+    $statement->execute(['nombre' => trim($name)]);
+    $id = $statement->fetchColumn();
+    return $id === false ? null : (int) $id;
+}
+
 function bootstrap(PDO $db): array
 {
     $accounts = array_map('account_row', $db->query(
-        'SELECT id, rol, nombres, apellidos, correo, telefono, distrito, foto,
-                notificar_impacto, notificar_campanas, notificar_resumen
-         FROM usuarios WHERE activo = 1 ORDER BY creado_en'
+        'SELECT u.id, r.codigo AS rol, u.nombres, u.apellidos, u.correo, u.telefono,
+                COALESCE(di.nombre, "") AS distrito, u.foto,
+                u.notificar_impacto, u.notificar_campanas, u.notificar_resumen
+         FROM usuarios u
+         INNER JOIN roles r ON r.id = u.rol_id
+         LEFT JOIN distritos di ON di.id = u.distrito_id
+         WHERE u.activo = 1 ORDER BY u.creado_en'
     )->fetchAll());
 
     $shelters = array_map(static fn(array $row): array => [
@@ -76,7 +99,11 @@ function bootstrap(PDO $db): array
         'name' => $row['nombre'],
         'district' => $row['distrito'],
         'status' => $row['estado'],
-    ], $db->query('SELECT id, nombre, distrito, estado FROM albergues ORDER BY creado_en')->fetchAll());
+    ], $db->query(
+        'SELECT a.id, a.nombre, di.nombre AS distrito, a.estado
+         FROM albergues a INNER JOIN distritos di ON di.id = a.distrito_id
+         ORDER BY a.creado_en'
+    )->fetchAll());
 
     $donations = array_map(static fn(array $row): array => [
         'id' => $row['id'],
@@ -88,15 +115,21 @@ function bootstrap(PDO $db): array
         'quantity' => (int) $row['cantidad'],
         'condition' => $row['estado_articulos'],
         'method' => $row['metodo_entrega'],
-        'district' => $row['distrito'],
+        'district' => $row['ubicacion_entrega'],
         'address' => $row['direccion'],
         'reference' => $row['referencia'],
-        'time' => $row['horario'],
-        'date' => $row['fecha'],
+        'time' => $row['horario_preferido'],
+        'date' => $row['fecha_programada'],
         'status' => $row['estado'],
     ], $db->query(
-        'SELECT d.*, u.nombres, u.apellidos
-         FROM donaciones d INNER JOIN usuarios u ON u.id = d.donante_id
+        'SELECT d.*, u.nombres, u.apellidos, dd.descripcion, dd.cantidad,
+                dd.estado_articulos, ca.nombre AS categoria
+         FROM donaciones d
+         INNER JOIN usuarios u ON u.id = d.donante_id
+         INNER JOIN detalle_donacion dd ON dd.id = (
+             SELECT MIN(dd2.id) FROM detalle_donacion dd2 WHERE dd2.donacion_id = d.id
+         )
+         INNER JOIN categorias_articulo ca ON ca.id = dd.categoria_id
          ORDER BY d.creado_en DESC'
     )->fetchAll());
 
@@ -106,7 +139,12 @@ function bootstrap(PDO $db): array
         'description' => $row['descripcion'],
         'category' => $row['categoria'],
         'active' => (bool) $row['activa'],
-    ], $db->query('SELECT id, albergue_id, descripcion, categoria, activa FROM necesidades ORDER BY creado_en DESC')->fetchAll());
+    ], $db->query(
+        'SELECT n.id, n.albergue_id, n.descripcion, ca.nombre AS categoria, n.activa
+         FROM necesidades n
+         INNER JOIN categorias_articulo ca ON ca.id = n.categoria_id
+         ORDER BY n.creado_en DESC'
+    )->fetchAll());
 
     return compact('accounts', 'shelters', 'donations', 'needs');
 }
@@ -129,10 +167,13 @@ try {
     if ($action === 'login') {
         require_fields($data, ['email', 'password']);
         $statement = $db->prepare(
-            'SELECT id, rol, nombres, apellidos, correo, telefono, distrito, foto,
-                    notificar_impacto, notificar_campanas, notificar_resumen
-             FROM usuarios
-             WHERE correo = :correo AND clave_hash = SHA2(:clave, 256) AND activo = 1'
+            'SELECT u.id, r.codigo AS rol, u.nombres, u.apellidos, u.correo, u.telefono,
+                    COALESCE(di.nombre, "") AS distrito, u.foto,
+                    u.notificar_impacto, u.notificar_campanas, u.notificar_resumen
+             FROM usuarios u
+             INNER JOIN roles r ON r.id = u.rol_id
+             LEFT JOIN distritos di ON di.id = u.distrito_id
+             WHERE u.correo = :correo AND u.clave_hash = SHA2(:clave, 256) AND u.activo = 1'
         );
         $statement->execute(['correo' => strtolower(trim((string) $data['email'])), 'clave' => (string) $data['password']]);
         $account = $statement->fetch();
@@ -144,35 +185,55 @@ try {
 
     if ($action === 'createDonation') {
         require_fields($data, ['id', 'donor', 'shelter', 'category', 'description', 'quantity', 'method', 'date']);
+        $categoryId = category_id($db, (string) $data['category']);
+        $db->beginTransaction();
         $statement = $db->prepare(
             'INSERT INTO donaciones
-             (id, donante_id, albergue_id, categoria, descripcion, cantidad, estado_articulos,
-              metodo_entrega, distrito, direccion, referencia, horario, fecha, estado)
+             (id, donante_id, albergue_id, metodo_entrega, ubicacion_entrega,
+              direccion, referencia, horario_preferido, fecha_programada, estado)
              VALUES
-             (:id, :donante, :albergue, :categoria, :descripcion, :cantidad, :condicion,
-              :metodo, :distrito, :direccion, :referencia, :horario, :fecha, :estado)'
+             (:id, :donante, :albergue, :metodo, :ubicacion,
+              :direccion, :referencia, :horario, :fecha, :estado)'
         );
         $statement->execute([
             'id' => $data['id'], 'donante' => $data['donor'], 'albergue' => $data['shelter'],
-            'categoria' => $data['category'], 'descripcion' => $data['description'],
-            'cantidad' => (int) $data['quantity'], 'condicion' => $data['condition'] ?? 'nuevo',
-            'metodo' => $data['method'], 'distrito' => $data['district'] ?? '',
+            'metodo' => $data['method'], 'ubicacion' => $data['district'] ?? '',
             'direccion' => $data['address'] ?? '', 'referencia' => $data['reference'] ?? '',
             'horario' => $data['time'] ?? '', 'fecha' => $data['date'],
             'estado' => $data['status'] ?? 'Pendiente',
         ]);
+        $detail = $db->prepare(
+            'INSERT INTO detalle_donacion
+             (donacion_id, categoria_id, descripcion, cantidad, estado_articulos)
+             VALUES (:donacion, :categoria, :descripcion, :cantidad, :condicion)'
+        );
+        $detail->execute([
+            'donacion' => $data['id'], 'categoria' => $categoryId,
+            'descripcion' => $data['description'], 'cantidad' => (int) $data['quantity'],
+            'condicion' => $data['condition'] ?? 'nuevo',
+        ]);
+        $tracking = $db->prepare(
+            'INSERT INTO seguimiento_donacion (donacion_id, estado, comentario, registrado_por)
+             VALUES (:donacion, :estado, :comentario, :usuario)'
+        );
+        $tracking->execute([
+            'donacion' => $data['id'], 'estado' => $data['status'] ?? 'Pendiente',
+            'comentario' => 'Donación registrada desde la plataforma.', 'usuario' => $data['donor'],
+        ]);
+        $db->commit();
         respond(['ok' => true], 201);
     }
 
     if ($action === 'createNeed') {
         require_fields($data, ['shelter', 'description', 'category']);
+        $categoryId = category_id($db, (string) $data['category']);
         $statement = $db->prepare(
-            'INSERT INTO necesidades (albergue_id, descripcion, categoria, activa)
-             VALUES (:albergue, :descripcion, :categoria, 1)'
+            'INSERT INTO necesidades (albergue_id, categoria_id, descripcion, activa)
+             VALUES (:albergue, :categoria, :descripcion, 1)'
         );
         $statement->execute([
             'albergue' => $data['shelter'], 'descripcion' => $data['description'],
-            'categoria' => $data['category'],
+            'categoria' => $categoryId,
         ]);
         respond(['ok' => true, 'id' => 'N' . $db->lastInsertId()], 201);
     }
@@ -186,8 +247,18 @@ try {
 
     if ($action === 'updateDonationStatus') {
         require_fields($data, ['id', 'status']);
+        $db->beginTransaction();
         $statement = $db->prepare('UPDATE donaciones SET estado = :estado WHERE id = :id');
         $statement->execute(['estado' => $data['status'], 'id' => $data['id']]);
+        $tracking = $db->prepare(
+            'INSERT INTO seguimiento_donacion (donacion_id, estado, comentario)
+             VALUES (:donacion, :estado, :comentario)'
+        );
+        $tracking->execute([
+            'donacion' => $data['id'], 'estado' => $data['status'],
+            'comentario' => 'Estado actualizado desde el panel de gestión.',
+        ]);
+        $db->commit();
         respond(['ok' => true]);
     }
 
@@ -214,16 +285,20 @@ try {
     if ($action === 'updateProfile') {
         require_fields($data, ['id', 'name', 'email', 'phone', 'district']);
         $notifications = $data['notifications'] ?? [true, true, false];
+        $districtId = district_id($db, (string) $data['district']);
+        if ($districtId === null) {
+            respond(['error' => 'El distrito seleccionado no existe.'], 422);
+        }
         $statement = $db->prepare(
             'UPDATE usuarios SET nombres = :nombres, apellidos = :apellidos, correo = :correo,
-             telefono = :telefono, distrito = :distrito, foto = :foto,
+             telefono = :telefono, distrito_id = :distrito, foto = :foto,
              notificar_impacto = :impacto, notificar_campanas = :campanas,
              notificar_resumen = :resumen WHERE id = :id'
         );
         $statement->execute([
             'id' => $data['id'], 'nombres' => $data['name'], 'apellidos' => $data['surname'] ?? '',
             'correo' => strtolower(trim((string) $data['email'])), 'telefono' => $data['phone'],
-            'distrito' => $data['district'], 'foto' => $data['photo'] ?? null,
+            'distrito' => $districtId, 'foto' => $data['photo'] ?? null,
             'impacto' => (int) (bool) ($notifications[0] ?? true),
             'campanas' => (int) (bool) ($notifications[1] ?? true),
             'resumen' => (int) (bool) ($notifications[2] ?? false),
@@ -248,11 +323,17 @@ try {
 
     respond(['error' => 'Acción no encontrada.'], 404);
 } catch (PDOException $error) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     $status = str_contains($error->getMessage(), 'Duplicate entry') ? 409 : 500;
     respond([
         'error' => $status === 409 ? 'El registro ya existe o el correo está duplicado.' : 'No se pudo acceder a MySQL.',
         'detail' => $error->getMessage(),
     ], $status);
 } catch (Throwable $error) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     respond(['error' => 'Error interno de la API.', 'detail' => $error->getMessage()], 500);
 }

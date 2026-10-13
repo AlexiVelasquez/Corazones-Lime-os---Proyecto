@@ -80,9 +80,11 @@ Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/
 
 ## MySQL y MySQL Workbench
 
-La base de datos se encuentra en `database/corazones_limenos.sql`. Incluye las
-tablas de usuarios, albergues, donaciones, necesidades y mensajes, además de
-las cuentas de demostración.
+La base de datos se encuentra en `database/corazones_limenos.sql`. Incluye
+**22 tablas relacionadas** para usuarios y roles, albergues, campañas,
+donaciones y sus artículos, necesidades, puntos de recojo, rutas, voluntarios,
+seguimiento, insignias, notificaciones, aliados y auditoría. También incorpora
+datos completos de demostración.
 
 1. Inicia el servicio MySQL.
 2. En MySQL Workbench selecciona **File > Open SQL Script**.
