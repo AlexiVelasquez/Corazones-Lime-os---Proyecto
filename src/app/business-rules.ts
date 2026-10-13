@@ -1,6 +1,23 @@
 export type DeliveryMethod = 'dropoff' | 'pickup';
 export type DonationStatus = 'Pendiente' | 'En tránsito' | 'Entregado';
 export type UserRole = 'donante' | 'albergue' | 'admin';
+export type PublicRegistrationRole = Exclude<UserRole, 'admin'>;
+
+export interface RegistrationData {
+  role: PublicRegistrationRole;
+  name: string;
+  surname: string;
+  shelterName: string;
+  email: string;
+  phone: string;
+  district: string;
+  password: string;
+  repeatPassword: string;
+  ruc: string;
+  address: string;
+  description: string;
+  acceptTerms: boolean;
+}
 
 export interface DonationFormData {
   category: string;
@@ -91,8 +108,37 @@ export class ProfileRules {
 
   static validatePasswordChange(current: string, stored: string, next: string, repeat: string): ValidationResult {
     if (current !== stored) return invalid('La contraseña actual no es correcta.');
-    if (next.length < 8) return invalid('La nueva contraseña debe tener al menos 8 caracteres.');
+    if (next.length < 8 || !/[a-z]/.test(next) || !/[A-Z]/.test(next) || !/\d/.test(next)) {
+      return invalid('La nueva contraseña debe tener 8 caracteres, mayúscula, minúscula y número.');
+    }
     if (next !== repeat) return invalid('Las contraseñas nuevas no coinciden.');
+    return valid();
+  }
+}
+
+/** Reglas del registro público. El rol administrador nunca se crea desde la web. */
+export class RegistrationRules {
+  static validate(data: RegistrationData): ValidationResult {
+    if (!['donante', 'albergue'].includes(data.role)) {
+      return invalid('Selecciona un tipo de cuenta permitido.');
+    }
+    if (data.name.trim().length < 2 || data.surname.trim().length < 2) {
+      return invalid('Ingresa los nombres y apellidos del responsable.');
+    }
+    if (!ProfileRules.isValidEmail(data.email)) return invalid('Ingresa un correo electrónico válido.');
+    if (!ProfileRules.isValidPhone(data.phone)) return invalid('Ingresa un teléfono de 9 a 15 dígitos.');
+    if (!data.district) return invalid('Selecciona tu distrito.');
+    if (data.password.length < 8 || !/[a-z]/.test(data.password) || !/[A-Z]/.test(data.password) || !/\d/.test(data.password)) {
+      return invalid('La contraseña debe tener 8 caracteres, mayúscula, minúscula y número.');
+    }
+    if (data.password !== data.repeatPassword) return invalid('Las contraseñas no coinciden.');
+    if (!data.acceptTerms) return invalid('Debes aceptar los términos y la política de privacidad.');
+    if (data.role === 'albergue') {
+      if (data.shelterName.trim().length < 3) return invalid('Ingresa el nombre del albergue.');
+      if (!/^\d{11}$/.test(data.ruc)) return invalid('El RUC del albergue debe contener 11 dígitos.');
+      if (data.address.trim().length < 8) return invalid('Ingresa la dirección completa del albergue.');
+      if (data.description.trim().length < 20) return invalid('Describe la labor del albergue con al menos 20 caracteres.');
+    }
     return valid();
   }
 }

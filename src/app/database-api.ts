@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
 import type { Account, Donation, Need, Shelter } from './store';
+import type { RegistrationData } from './business-rules';
 
 export interface DatabaseBootstrap {
   accounts: Account[];
   shelters: Shelter[];
   donations: Donation[];
   needs: Need[];
+}
+
+export class DatabaseApiError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = 'DatabaseApiError';
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,12 +26,13 @@ export class DatabaseApi {
     try {
       const response = await fetch(`${this.endpoint}?action=${encodeURIComponent(action)}`, {
         method: data === undefined ? 'GET' : 'POST',
+        credentials: 'include',
         headers: data === undefined ? undefined : { 'Content-Type': 'application/json' },
         body: data === undefined ? undefined : JSON.stringify(data),
         signal: controller.signal,
       });
       const result = await response.json().catch(() => ({})) as T & { error?: string };
-      if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+      if (!response.ok) throw new DatabaseApiError(result.error || `Error HTTP ${response.status}`, response.status);
       return result;
     } finally {
       clearTimeout(timer);
@@ -32,6 +41,8 @@ export class DatabaseApi {
 
   bootstrap() { return this.request<DatabaseBootstrap>('bootstrap', undefined, 1800); }
   login(email: string, password: string) { return this.request<{ account: Account }>('login', { email, password }); }
+  register(registration: RegistrationData) { return this.request<{ account: Account; shelter?: Shelter }>('register', registration); }
+  logout() { return this.request<{ ok: boolean }>('logout', {}); }
   createDonation(donation: Donation) { return this.request<{ ok: boolean }>('createDonation', donation); }
   createNeed(need: Need) { return this.request<{ ok: boolean; id: string }>('createNeed', need); }
   updateNeed(id: string, active: boolean) { return this.request<{ ok: boolean }>('updateNeed', { id, active }); }

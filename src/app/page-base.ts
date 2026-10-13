@@ -50,6 +50,7 @@ export class PageBase {
   fill(role: Role) { const a = this.s.accounts.find(a => a.role === role)!; this.email = a.email; this.password = a.password; }
   publish() {
     if (this.s.user?.role !== 'albergue') return;
+    if (this.s.currentShelter?.status !== 'Aprobado') { this.s.notify('Tu albergue debe ser aprobado antes de publicar necesidades.'); return; }
     if (this.need.description.trim().length < 5) { this.s.notify('Describe la necesidad con al menos 5 caracteres.'); return; }
     const need = { ...this.need, description: this.need.description.trim(), id: 'N' + Date.now(), shelter: this.s.user.id, active: true };
     this.s.needs.unshift(need); this.s.persistNeed(need); this.need.description = ''; this.s.save(); this.s.notify('Necesidad publicada. Ya es visible en el directorio.');

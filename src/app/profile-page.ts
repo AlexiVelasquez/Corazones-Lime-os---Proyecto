@@ -13,7 +13,7 @@ import { PageBase } from './page-base';
       <header class="dash-head"><div><span class="eyebrow">Mi cuenta</span><h1>Perfil y configuración</h1><p>Gestiona tus datos, preferencias y seguridad.</p></div><button (click)="go(s.panel)">← Volver al panel</button></header>
       <div class="profile-grid"><div>
         <section class="panel profile-card"><div class="profile-photo">@if(profile.photo){<img [src]="profile.photo" alt="Foto de perfil">}@else{<span>{{profile.name?.[0]}}</span>}<label class="btn outline small">Cambiar foto<input type="file" accept="image/png,image/jpeg,image/webp" (change)="photo($event)" hidden></label></div>
-          <form class="form-grid" (ngSubmit)="saveProfile()"><label>Nombre<input [(ngModel)]="profile.name" name="name"></label><label>Apellidos<input [(ngModel)]="profile.surname" name="surname"></label><label class="wide-label">Correo electrónico<input [(ngModel)]="profile.email" name="email" type="email"></label><label>Teléfono<input [(ngModel)]="profile.phone" name="phone"></label><label>Distrito<select [(ngModel)]="profile.district" name="district"><option>Miraflores</option><option>San Isidro</option><option>Comas</option><option>San Juan de Lurigancho</option><option>Villa El Salvador</option></select></label><button class="btn">Guardar cambios</button></form>
+          <form class="form-grid" (ngSubmit)="saveProfile()"><label>Nombre<input [(ngModel)]="profile.name" name="name"></label><label>Apellidos<input [(ngModel)]="profile.surname" name="surname"></label><label class="wide-label">Correo electrónico<input [(ngModel)]="profile.email" name="email" type="email"></label><label>Teléfono<input [(ngModel)]="profile.phone" name="phone"></label><label>Distrito<select [(ngModel)]="profile.district" name="district"><option>Miraflores</option><option>San Isidro</option><option>Comas</option><option>San Juan de Lurigancho</option><option>Villa El Salvador</option><option>Los Olivos</option><option>San Martín de Porres</option><option>Santiago de Surco</option><option>Lima Cercado</option><option>La Molina</option></select></label><button class="btn">Guardar cambios</button></form>
         </section>
         <section class="panel"><h2>Preferencias de notificación</h2>@for(label of ['Actualizaciones de impacto','Nuevas campañas','Resumen mensual'];track label;let i=$index){<label class="check"><input type="checkbox" [(ngModel)]="profile.notifications[i]"><span><b>{{label}}</b><small>{{i===0?'Noticias sobre el destino de tus donaciones.':i===1?'Nuevas oportunidades para ayudar.':'Tu actividad e impacto del mes.'}}</small></span></label>}<button class="btn small" (click)="saveProfile()">Guardar preferencias</button></section>
       </div><aside>
@@ -23,7 +23,8 @@ import { PageBase } from './page-base';
           <label for="repeat-password">Repetir contraseña</label><input id="repeat-password" [(ngModel)]="repeatPassword" [type]="showPassword?'text':'password'">
           <button class="btn full" (click)="changePassword()">Actualizar contraseña</button>
         </section>
-        <section class="panel"><h2>Insignias de impacto</h2><div class="badges"><div>♥<b>Corazón fiel</b></div><div>🥫<b>Nutridor</b></div></div></section>
+        <section class="panel role-summary"><span class="eyebrow">Acceso asignado</span><h2>{{s.roleDefinition?.label}}</h2><p>{{s.roleDefinition?.description}}</p><ul>@for(permission of s.roleDefinition?.permissions; track permission){<li>✓ {{permission}}</li>}</ul></section>
+        @if(s.user?.role === 'donante'){<section class="panel"><h2>Insignias de impacto</h2><div class="badges"><div>♥<b>Corazón fiel</b></div><div>🥫<b>Nutridor</b></div></div></section>}
       </aside></div>
     </main>
   `,

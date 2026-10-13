@@ -20,7 +20,7 @@ import { PageBase } from './page-base';
           @for (d of visibleDonations; track d.id) {
             <tr><td>{{ d.id }}</td><td>{{ d.donorName }}</td><td>{{ d.description }}</td><td>{{ s.shelterName(d.shelter) }}</td><td>{{ d.date }}</td><td><span class="status" [class.done]="d.status === 'Entregado'">{{ d.status }}</span></td><td>
               @if (s.user?.role === 'admin' && d.status === 'Pendiente') { <button class="btn small" (click)="dispatch(d.id)">Asignar ruta</button> }
-              @if (s.user?.role === 'albergue' && d.status !== 'Entregado') { <button class="btn small" (click)="receive(d.id)">Confirmar recepción</button> }
+              @if (s.user?.role === 'albergue' && d.status === 'En tránsito') { <button class="btn small" (click)="receive(d.id)">Confirmar recepción</button> }
             </td></tr>
           } @empty { <tr><td colspan="7"><div class="empty">No hay donaciones para este filtro.</div></td></tr> }
         </tbody></table></div>

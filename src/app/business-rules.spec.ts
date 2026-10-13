@@ -1,4 +1,4 @@
-import { DonationRules, DonationStatusRules, ProfileRules } from './business-rules';
+import { DonationRules, DonationStatusRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
 
 describe('1. Pruebas de categoría de donación', () => {
   it('CP-UNIT-001 acepta la categoría Juguetes', () => {
@@ -96,5 +96,43 @@ describe('5. Pruebas del perfil del usuario', () => {
 
   it('CP-UNIT-018 rechaza contraseñas nuevas diferentes', () => {
     expect(ProfileRules.validatePasswordChange('Actual123', 'Actual123', 'Nueva123!', 'Otra123!').valid).toBe(false);
+  });
+});
+
+describe('6. Pruebas del registro y definición de roles', () => {
+  const validDonor: RegistrationData = {
+    role: 'donante', name: 'Lucía', surname: 'Paredes', shelterName: '',
+    email: 'lucia@correo.pe', phone: '987654321', district: 'Miraflores',
+    password: 'Clave123!', repeatPassword: 'Clave123!', ruc: '', address: '',
+    description: '', acceptTerms: true,
+  };
+
+  it('CP-UNIT-019 permite registrar un donante con datos válidos', () => {
+    expect(RegistrationRules.validate(validDonor).valid).toBe(true);
+  });
+
+  it('CP-UNIT-020 impide el registro público de administradores', () => {
+    expect(RegistrationRules.validate({ ...validDonor, role: 'admin' as never }).valid).toBe(false);
+  });
+
+  it('CP-UNIT-021 exige una contraseña con complejidad mínima', () => {
+    expect(RegistrationRules.validate({ ...validDonor, password: 'simple', repeatPassword: 'simple' }).valid).toBe(false);
+  });
+
+  it('CP-UNIT-022 exige que ambas contraseñas coincidan', () => {
+    expect(RegistrationRules.validate({ ...validDonor, repeatPassword: 'Distinta123!' }).valid).toBe(false);
+  });
+
+  it('CP-UNIT-023 exige los datos institucionales para un albergue', () => {
+    expect(RegistrationRules.validate({ ...validDonor, role: 'albergue' }).valid).toBe(false);
+  });
+
+  it('CP-UNIT-024 acepta una solicitud completa de albergue', () => {
+    const shelter = {
+      ...validDonor, role: 'albergue' as const, shelterName: 'Hogar Luz de Lima',
+      ruc: '20123456789', address: 'Av. Lima 123, Comas',
+      description: 'Atención y alimentación para familias vulnerables.',
+    };
+    expect(RegistrationRules.validate(shelter).valid).toBe(true);
   });
 });

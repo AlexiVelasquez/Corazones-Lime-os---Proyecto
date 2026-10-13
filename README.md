@@ -65,6 +65,17 @@ npm run build:portable
 
 En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
 
+## Registro y roles
+
+La ruta `/registro` permite crear cuentas de **donante** y **albergue**. Las
+cuentas administrativas no tienen registro público: se asignan internamente.
+Los albergues nuevos quedan en estado **Pendiente** y pueden acceder a su panel,
+pero no publicar necesidades hasta que un administrador los apruebe.
+
+Cada panel y cada operación de la API valida la sesión y el rol del usuario.
+La matriz completa de permisos y el flujo de aprobación se encuentran en
+[`docs/ROLES-Y-REGISTRO.md`](docs/ROLES-Y-REGISTRO.md).
+
 ## Funcionalidad incluida
 
 - Landing page, directorio filtrable, contacto y preguntas frecuentes.
@@ -73,6 +84,10 @@ En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
 - Panel del albergue para publicar necesidades y confirmar recepciones.
 - Panel administrativo para aprobar albergues, asignar rutas y exportar CSV.
 - Perfil, preferencias, foto y cambio de contraseña.
+- Registro de cuentas con validación de datos, contraseña segura y aprobación
+  administrativa de albergues.
+- Protección de rutas y permisos en el servidor para donantes, albergues y
+  administradores.
 
 Al ejecutar la versión portable sin MySQL, los datos de demostración se
 guardan en `localStorage`. Con `INICIAR_CON_BASE_DE_DATOS.bat` o
