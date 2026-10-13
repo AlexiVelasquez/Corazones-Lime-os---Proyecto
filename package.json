@@ -12,6 +12,10 @@
     "test:watch": "ng test --watch"
   },
   "private": true,
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0",
+    "npm": ">=11.13.0"
+  },
   "packageManager": "npm@11.13.0",
   "dependencies": {
     "@angular/common": "^22.1.0",

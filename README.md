@@ -24,6 +24,22 @@ El sistema abrirá `http://127.0.0.1:8080/` y funcionará sin Angular CLI,
 Node.js, `npm install` ni conexión a internet. Debe copiarse la carpeta
 `portable` completa; no se debe abrir `app/index.html` directamente.
 
+También se puede ejecutar `INICIAR_SIN_INSTALAR.bat`, ubicado en la raíz del
+repositorio. No ejecutes `npm ci` en una computadora sin internet.
+
+### Error `EBADENGINE` o `Exit handler never called`
+
+Si la terminal muestra Node `24.13.1` y npm `11.8.0`, esa instalación no es
+compatible con las dependencias actuales de Angular CLI. Para desarrollar con
+Node y npm se requiere una de estas versiones de Node:
+
+- Node 22.22.2 o una versión 22 posterior compatible.
+- Node 24.15.0 o posterior.
+- Node 26 o posterior.
+
+En las computadoras con firewall usa `INICIAR_SIN_INSTALAR.bat`. Esta ejecución
+no instala paquetes y no modifica la instalación de Node de la computadora.
+
 Cuando se modifique el código fuente, la versión portable se actualiza desde
 una computadora de desarrollo con:
 
