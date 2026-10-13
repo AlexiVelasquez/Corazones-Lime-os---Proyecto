@@ -7,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = ['http://127.0.0.1:8080', 'http://localhost:4200', 'http://127.0.0.1:4200'];
 $privateNetworkOrigin = preg_match(
-    '#^http://(?:10\.0\.2\.2|192\.168\.56\.1|192\.168\.\d{1,3}\.\d{1,3}):(?:8080|4200)$#',
+    '#^http://(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}):(?:8080|4200)$#',
     $origin
 ) === 1;
 if (in_array($origin, $allowedOrigins, true) || $privateNetworkOrigin) {

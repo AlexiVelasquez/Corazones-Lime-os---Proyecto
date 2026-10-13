@@ -11,6 +11,11 @@ En la configuración NAT predeterminada, VirtualBox representa al equipo
 Windows con la dirección `10.0.2.2`. No uses `localhost` dentro de Kali, porque
 esa dirección representa a la propia máquina virtual.
 
+Si utilizas **Adaptador puente**, consulta la IPv4 de Windows con `ipconfig` y
+usa esa dirección. Por ejemplo, si Windows muestra `10.242.146.148`, desde Kali
+debes abrir `http://10.242.146.148:8080/`. Kali debe recibir una dirección del
+mismo rango mediante `ip addr`.
+
 Si VirtualBox 7.2 bloquea el acceso al bucle local, apaga Kali y ejecuta en una
 terminal de Windows, sustituyendo `Kali Linux` por el nombre exacto de la VM:
 

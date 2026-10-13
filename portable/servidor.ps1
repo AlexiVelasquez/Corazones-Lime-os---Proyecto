@@ -52,6 +52,11 @@ Write-Host ''
 Write-Host "Corazones Limenos esta disponible en $url" -ForegroundColor Green
 if ($ListenAddress -eq '0.0.0.0') {
     Write-Host "Desde Kali con NAT abre: http://10.0.2.2:$Port/" -ForegroundColor Cyan
+    $networkAddresses = [Net.Dns]::GetHostAddresses([Net.Dns]::GetHostName()) |
+        Where-Object { $_.AddressFamily -eq [Net.Sockets.AddressFamily]::InterNetwork -and -not [Net.IPAddress]::IsLoopback($_) }
+    foreach ($address in $networkAddresses) {
+        Write-Host "Desde Kali con puente/Host-Only: http://$($address.IPAddressToString):$Port/" -ForegroundColor Cyan
+    }
 }
 Write-Host 'Esta version no necesita Angular CLI ni acceso a internet.'
 Write-Host 'Para detenerla, presiona Ctrl+C o cierra esta ventana.'

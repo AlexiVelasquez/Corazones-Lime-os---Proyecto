@@ -53,7 +53,7 @@ try {
     Write-Host 'Base de datos y API conectadas correctamente.' -ForegroundColor Green
     if ($NetworkAccess) {
         Write-Host 'Modo de red para Kali/ZAP habilitado.' -ForegroundColor Cyan
-        Write-Host 'En Kali utiliza http://10.0.2.2:8080/' -ForegroundColor Cyan
+        Write-Host 'La siguiente ventana mostrara las direcciones disponibles para Kali.' -ForegroundColor Cyan
         & (Join-Path $projectRoot 'portable\servidor.ps1') -ListenAddress '0.0.0.0'
     } else {
         & (Join-Path $projectRoot 'portable\servidor.ps1')
