@@ -10,7 +10,7 @@ export interface DatabaseBootstrap {
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseApi {
-  private readonly endpoint = 'http://127.0.0.1:8081/api.php';
+  private readonly endpoint = `${window.location.protocol}//${window.location.hostname || '127.0.0.1'}:8081/api.php`;
 
   private async request<T>(action: string, data?: unknown, timeout = 5000): Promise<T> {
     const controller = new AbortController();

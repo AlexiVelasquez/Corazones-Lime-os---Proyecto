@@ -1,5 +1,6 @@
 param(
     [int]$Port = 8080,
+    [string]$ListenAddress = '127.0.0.1',
     [switch]$NoBrowser
 )
 
@@ -31,7 +32,12 @@ function Get-ContentType([string]$Path) {
     }
 }
 
-$listener = [Net.Sockets.TcpListener]::new([Net.IPAddress]::Loopback, $Port)
+$listenIp = if ($ListenAddress -eq '0.0.0.0') {
+    [Net.IPAddress]::Any
+} else {
+    [Net.IPAddress]::Parse($ListenAddress)
+}
+$listener = [Net.Sockets.TcpListener]::new($listenIp, $Port)
 
 try {
     $listener.Start()
@@ -44,6 +50,9 @@ try {
 $url = "http://127.0.0.1:$Port/"
 Write-Host ''
 Write-Host "Corazones Limenos esta disponible en $url" -ForegroundColor Green
+if ($ListenAddress -eq '0.0.0.0') {
+    Write-Host "Desde Kali con NAT abre: http://10.0.2.2:$Port/" -ForegroundColor Cyan
+}
 Write-Host 'Esta version no necesita Angular CLI ni acceso a internet.'
 Write-Host 'Para detenerla, presiona Ctrl+C o cierra esta ventana.'
 Write-Host ''

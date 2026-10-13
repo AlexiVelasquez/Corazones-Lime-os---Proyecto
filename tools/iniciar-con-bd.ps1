@@ -1,3 +1,7 @@
+param(
+    [switch]$NetworkAccess
+)
+
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $php = 'C:\xampp\php\php.exe'
@@ -37,7 +41,8 @@ $outputLog = Join-Path $logDirectory 'php.out.log'
 $errorLog = Join-Path $logDirectory 'php.err.log'
 $backendPath = Join-Path $projectRoot 'backend'
 
-$backend = Start-Process -FilePath $php -ArgumentList @('-S', '127.0.0.1:8081', '-t', $backendPath) `
+$backendAddress = if ($NetworkAccess) { '0.0.0.0:8081' } else { '127.0.0.1:8081' }
+$backend = Start-Process -FilePath $php -ArgumentList @('-S', $backendAddress, '-t', $backendPath) `
     -WorkingDirectory $projectRoot -RedirectStandardOutput $outputLog -RedirectStandardError $errorLog `
     -WindowStyle Hidden -PassThru
 
@@ -46,7 +51,13 @@ try {
     $health = Invoke-RestMethod 'http://127.0.0.1:8081/api.php?action=health' -TimeoutSec 4
     if (-not $health.ok) { throw 'La API no pudo consultar MySQL.' }
     Write-Host 'Base de datos y API conectadas correctamente.' -ForegroundColor Green
-    & (Join-Path $projectRoot 'portable\servidor.ps1')
+    if ($NetworkAccess) {
+        Write-Host 'Modo de red para Kali/ZAP habilitado.' -ForegroundColor Cyan
+        Write-Host 'En Kali utiliza http://10.0.2.2:8080/' -ForegroundColor Cyan
+        & (Join-Path $projectRoot 'portable\servidor.ps1') -ListenAddress '0.0.0.0'
+    } else {
+        & (Join-Path $projectRoot 'portable\servidor.ps1')
+    }
 } catch {
     Write-Host 'No se pudo abrir la base de datos corazones_limenos.' -ForegroundColor Red
     Write-Host 'Importa database\corazones_limenos.sql desde MySQL Workbench.'

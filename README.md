@@ -68,7 +68,10 @@ En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
 - Panel administrativo para aprobar albergues, asignar rutas y exportar CSV.
 - Perfil, preferencias, foto y cambio de contraseña.
 
-Los datos de esta versión de demostración se guardan en `localStorage`. No existe un backend ni se envían correos reales. Para reiniciar los datos, borra el almacenamiento del sitio desde el navegador.
+Al ejecutar la versión portable sin MySQL, los datos de demostración se
+guardan en `localStorage`. Con `INICIAR_CON_BASE_DE_DATOS.bat` o
+`INICIAR_PARA_ZAP.bat`, la aplicación utiliza la API PHP y MySQL. No se envían
+correos reales.
 
 ## Pruebas unitarias
 
@@ -100,3 +103,10 @@ indicador **MySQL conectado**. Si MySQL está apagado, el frontend conserva el
 modo local para que la demostración siga funcionando.
 
 Las instrucciones detalladas están en `database/IMPORTAR_EN_WORKBENCH.md`.
+
+## OWASP ZAP desde Kali Linux en VirtualBox
+
+Para exponer la aplicación únicamente durante la práctica de seguridad,
+inicia MySQL y ejecuta `INICIAR_PARA_ZAP.bat`. Con el adaptador de Kali en modo
+NAT, abre `http://10.0.2.2:8080/` desde Kali y usa esa misma dirección como
+objetivo en ZAP. La guía completa está en `docs/OWASP-ZAP-KALI.md`.
