@@ -131,3 +131,6 @@ Para exponer la aplicación únicamente durante la práctica de seguridad,
 inicia MySQL y ejecuta `INICIAR_PARA_ZAP.bat`. Con el adaptador de Kali en modo
 NAT, abre `http://10.0.2.2:8080/` desde Kali y usa esa misma dirección como
 objetivo en ZAP. La guía completa está en `docs/OWASP-ZAP-KALI.md`.
+
+La presentación [`Analisis_OWASP_ZAP_Corazones_Limenos.pptx`](docs/Analisis_OWASP_ZAP_Corazones_Limenos.pptx)
+explica las alertas, los códigos OWASP/WSTG/CWE/WASC y el plan de remediación.
