@@ -2,6 +2,7 @@ export type DeliveryMethod = 'dropoff' | 'pickup';
 export type DonationStatus = 'Pendiente' | 'En tránsito' | 'Entregado';
 export type UserRole = 'donante' | 'albergue' | 'admin';
 export type PublicRegistrationRole = Exclude<UserRole, 'admin'>;
+export type ProtectedArea = 'donation' | 'donor-panel' | 'shelter-panel' | 'admin-panel' | 'profile';
 
 export interface RegistrationData {
   role: PublicRegistrationRole;
@@ -93,6 +94,21 @@ export class DonationStatusRules {
     if (role === 'admin' && status === 'Pendiente') return 'En tránsito';
     if (role === 'albergue' && status === 'En tránsito') return 'Entregado';
     return status;
+  }
+}
+
+/** Matriz central de autorización usada por las rutas y cubierta por pruebas. */
+export class AccessRules {
+  private static readonly permissions: Record<ProtectedArea, UserRole[]> = {
+    donation: ['donante'],
+    'donor-panel': ['donante'],
+    'shelter-panel': ['albergue'],
+    'admin-panel': ['admin'],
+    profile: ['donante', 'albergue', 'admin'],
+  };
+
+  static canAccess(role: UserRole | null | undefined, area: ProtectedArea): boolean {
+    return Boolean(role && this.permissions[area].includes(role));
   }
 }
 

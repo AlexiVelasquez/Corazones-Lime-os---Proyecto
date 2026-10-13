@@ -1,4 +1,4 @@
-import { DonationRules, DonationStatusRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
+import { AccessRules, DonationRules, DonationStatusRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
 
 describe('1. Pruebas de categoría de donación', () => {
   it('CP-UNIT-001 acepta la categoría Juguetes', () => {
@@ -134,5 +134,31 @@ describe('6. Pruebas del registro y definición de roles', () => {
       description: 'Atención y alimentación para familias vulnerables.',
     };
     expect(RegistrationRules.validate(shelter).valid).toBe(true);
+  });
+});
+
+describe('7. Pruebas de autorización de rutas', () => {
+  it('CP-UNIT-025 exige autenticación para las áreas protegidas', () => {
+    expect(AccessRules.canAccess(null, 'profile')).toBe(false);
+    expect(AccessRules.canAccess(undefined, 'donation')).toBe(false);
+  });
+
+  it('CP-UNIT-026 permite el flujo de donación solo al donante', () => {
+    expect(AccessRules.canAccess('donante', 'donation')).toBe(true);
+    expect(AccessRules.canAccess('albergue', 'donation')).toBe(false);
+    expect(AccessRules.canAccess('admin', 'donation')).toBe(false);
+  });
+
+  it('CP-UNIT-027 separa los paneles de donante, albergue y administrador', () => {
+    expect(AccessRules.canAccess('donante', 'donor-panel')).toBe(true);
+    expect(AccessRules.canAccess('donante', 'admin-panel')).toBe(false);
+    expect(AccessRules.canAccess('albergue', 'shelter-panel')).toBe(true);
+    expect(AccessRules.canAccess('admin', 'admin-panel')).toBe(true);
+  });
+
+  it('CP-UNIT-028 permite que cualquier cuenta autenticada gestione su perfil', () => {
+    expect(AccessRules.canAccess('donante', 'profile')).toBe(true);
+    expect(AccessRules.canAccess('albergue', 'profile')).toBe(true);
+    expect(AccessRules.canAccess('admin', 'profile')).toBe(true);
   });
 });

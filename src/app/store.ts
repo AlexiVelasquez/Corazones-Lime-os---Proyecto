@@ -80,7 +80,7 @@ export class Store {
       return true;
     } catch (error) {
       this.databaseConnected.set(false);
-      if (error instanceof DatabaseApiError) return false;
+      if (error instanceof DatabaseApiError) { this.notify(error.message); return false; }
       if (databaseWasConnected) return false;
     }
     const account = this.accounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase() && a.password === password);
@@ -121,7 +121,11 @@ export class Store {
     this.save();
     return { ok: true, message: '' };
   }
-  logout() { void this.api.logout(); this.userId = null; this.draft = blankDraft(); this.save(); }
+  async logout() {
+    const closeRemoteSession = this.databaseConnected();
+    this.userId = null; this.draft = blankDraft(); this.save();
+    if (closeRemoteSession) await this.api.logout().catch(() => undefined);
+  }
   toggleTheme() { this.darkMode.update(value => !value); localStorage.setItem('calidad.v1.theme', JSON.stringify(this.darkMode() ? 'dark' : 'light')); this.applyTheme(); }
   private applyTheme() { document.documentElement.classList.toggle('dark', this.darkMode()); }
   save() {
@@ -151,24 +155,41 @@ export class Store {
       this.databaseConnected.set(false);
     }
   }
-  private async remote(operation: () => Promise<unknown>) {
-    try { await operation(); this.databaseConnected.set(true); }
-    catch { this.databaseConnected.set(false); }
+  private async remote(operation: () => Promise<unknown>): Promise<boolean> {
+    if (!this.databaseConnected()) return true;
+    try {
+      await operation();
+      return true;
+    } catch (error) {
+      if (error instanceof DatabaseApiError) {
+        if (error.status === 401) {
+          this.userId = null;
+          this.notify('Tu sesión expiró. Inicia sesión nuevamente.');
+        } else {
+          this.notify(error.message);
+        }
+        await this.syncFromDatabase();
+      } else {
+        this.databaseConnected.set(false);
+        this.notify('No se pudo conectar con MySQL. La operación no fue guardada.');
+      }
+      this.save();
+      return false;
+    }
   }
-  persistDonation(donation: Donation) { void this.remote(() => this.api.createDonation(donation)); }
+  persistDonation(donation: Donation) { return this.remote(() => this.api.createDonation(donation)); }
   persistNeed(need: Need) {
-    void this.remote(async () => {
+    return this.remote(async () => {
       const result = await this.api.createNeed(need);
-      const local = this.needs.find(item => item.id === need.id);
-      if (local) local.id = result.id;
+      need.id = result.id;
       this.save();
     });
   }
-  persistNeedStatus(id: string, active: boolean) { void this.remote(() => this.api.updateNeed(id, active)); }
-  persistDonationStatus(id: string, status: Donation['status']) { void this.remote(() => this.api.updateDonationStatus(id, status)); }
-  persistShelterStatus(id: string, status: Shelter['status']) { void this.remote(() => this.api.updateShelterStatus(id, status)); }
-  persistMessage(message: { name: string; email: string; subject: string; message: string }) { void this.remote(() => this.api.saveMessage(message)); }
-  persistProfile(account: Account) { void this.remote(() => this.api.updateProfile(account)); }
+  persistNeedStatus(id: string, active: boolean) { return this.remote(() => this.api.updateNeed(id, active)); }
+  persistDonationStatus(id: string, status: Donation['status']) { return this.remote(() => this.api.updateDonationStatus(id, status)); }
+  persistShelterStatus(id: string, status: Shelter['status']) { return this.remote(() => this.api.updateShelterStatus(id, status)); }
+  persistMessage(message: { name: string; email: string; subject: string; message: string }) { return this.remote(() => this.api.saveMessage(message)); }
+  persistProfile(account: Account) { return this.remote(() => this.api.updateProfile(account)); }
   async persistPassword(currentPassword: string, newPassword: string) {
     if (!this.user) return false;
     try {

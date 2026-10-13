@@ -134,3 +134,21 @@ objetivo en ZAP. La guía completa está en `docs/OWASP-ZAP-KALI.md`.
 
 La presentación [`Analisis_OWASP_ZAP_Corazones_Limenos.pptx`](docs/Analisis_OWASP_ZAP_Corazones_Limenos.pptx)
 explica las alertas, los códigos OWASP/WSTG/CWE/WASC y el plan de remediación.
+
+## Seguridad y permisos
+
+Las rutas privadas están protegidas por sesión y rol. El flujo `/donar` solo
+acepta donantes; los paneles de donante, albergue y administrador no se pueden
+intercambiar escribiendo otra URL. La API vuelve a comprobar cada permiso, la
+propiedad del registro y las transiciones de estado, por lo que modificar el
+frontend tampoco permite saltar la autorización.
+
+La API incorpora token CSRF, caducidad de sesión por inactividad, rotación de
+sesión, límites de intentos, CORS restringido, validación de tamaño/formato y
+respuestas sin detalles internos. Los servidores Angular y portable incluyen
+CSP y protección contra clickjacking. Para una base ya importada, ejecuta una
+vez `database/migrations/002_security_hardening.sql`; las contraseñas antiguas
+se migran automáticamente a `password_hash` al iniciar sesión.
+
+La matriz completa y las instrucciones de prueba están en
+[`docs/SEGURIDAD-Y-ROLES.md`](docs/SEGURIDAD-Y-ROLES.md).

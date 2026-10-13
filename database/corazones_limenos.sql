@@ -54,7 +54,7 @@ CREATE TABLE usuarios (
   apellidos VARCHAR(100) NOT NULL DEFAULT '',
   correo VARCHAR(160) NOT NULL UNIQUE,
   telefono VARCHAR(20) NOT NULL,
-  clave_hash CHAR(64) NOT NULL,
+  clave_hash VARCHAR(255) NOT NULL,
   foto MEDIUMTEXT NULL,
   notificar_impacto TINYINT(1) NOT NULL DEFAULT 1,
   notificar_campanas TINYINT(1) NOT NULL DEFAULT 1,

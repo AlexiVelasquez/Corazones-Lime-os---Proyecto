@@ -32,6 +32,8 @@ function Get-ContentType([string]$Path) {
     }
 }
 
+$securityHeaders = "Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 http://10.0.2.2:8081 http://10.242.146.148:8081`r`nX-Frame-Options: DENY`r`nX-Content-Type-Options: nosniff`r`nReferrer-Policy: strict-origin-when-cross-origin`r`nPermissions-Policy: camera=(), microphone=(), geolocation=()`r`n"
+
 $listenIp = if ($ListenAddress -eq '0.0.0.0') {
     [Net.IPAddress]::Any
 } else {
@@ -97,7 +99,7 @@ try {
                     $candidate = Join-Path $appRoot 'index.html'
                 } else {
                     $body = [Text.Encoding]::UTF8.GetBytes('404 - Archivo no encontrado')
-                    $header = "HTTP/1.1 404 Not Found`r`nContent-Type: text/plain; charset=utf-8`r`nContent-Length: $($body.Length)`r`nConnection: close`r`n`r`n"
+                    $header = "HTTP/1.1 404 Not Found`r`n${securityHeaders}Content-Type: text/plain; charset=utf-8`r`nContent-Length: $($body.Length)`r`nConnection: close`r`n`r`n"
                     $headerBytes = [Text.Encoding]::ASCII.GetBytes($header)
                     $stream.Write($headerBytes, 0, $headerBytes.Length)
                     if ($method -eq 'GET') { $stream.Write($body, 0, $body.Length) }
@@ -107,7 +109,8 @@ try {
 
             $body = [IO.File]::ReadAllBytes($candidate)
             $contentType = Get-ContentType $candidate
-            $header = "HTTP/1.1 200 OK`r`nContent-Type: $contentType`r`nContent-Length: $($body.Length)`r`nCache-Control: no-cache`r`nConnection: close`r`n`r`n"
+            $cacheControl = if ($contentType.StartsWith('text/html')) { 'no-store' } else { 'public, max-age=3600' }
+            $header = "HTTP/1.1 200 OK`r`n${securityHeaders}Content-Type: $contentType`r`nContent-Length: $($body.Length)`r`nCache-Control: $cacheControl`r`nConnection: close`r`n`r`n"
             $headerBytes = [Text.Encoding]::ASCII.GetBytes($header)
             $stream.Write($headerBytes, 0, $headerBytes.Length)
             if ($method -eq 'GET') { $stream.Write($body, 0, $body.Length) }

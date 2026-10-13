@@ -36,13 +36,24 @@ Archivos principales:
 | CP-UNIT-016 | HU-SEG-02 | Aceptar cambio de contraseña | Alta | Usuario autenticado | Actual correcta y nuevas iguales | Validación aceptada | Validación aceptada | PASS |
 | CP-UNIT-017 | HU-SEG-02 | Rechazar contraseña actual incorrecta | Alta | Usuario autenticado | Actual incorrecta | Validación rechazada | Validación rechazada | PASS |
 | CP-UNIT-018 | HU-SEG-02 | Rechazar contraseñas nuevas diferentes | Alta | Usuario autenticado | Nuevas diferentes | Validación rechazada | Validación rechazada | PASS |
+| CP-UNIT-019 | HU-REG-01 | Registrar donante válido | Alta | Formulario completo | Datos válidos | Registro aceptado | Registro aceptado | PASS |
+| CP-UNIT-020 | HU-SEG-03 | Bloquear registro público de administrador | Alta | Formulario de registro | Rol `admin` | Validación rechazada | Validación rechazada | PASS |
+| CP-UNIT-021 | HU-REG-01 | Exigir contraseña compleja | Alta | Formulario de registro | `simple` | Validación rechazada | Validación rechazada | PASS |
+| CP-UNIT-022 | HU-REG-01 | Exigir contraseñas coincidentes | Alta | Formulario de registro | Contraseñas distintas | Validación rechazada | Validación rechazada | PASS |
+| CP-UNIT-023 | HU-ALB-02 | Exigir datos institucionales | Alta | Registro de albergue | Datos incompletos | Validación rechazada | Validación rechazada | PASS |
+| CP-UNIT-024 | HU-ALB-02 | Registrar solicitud de albergue | Alta | Formulario completo | RUC, dirección y descripción válidos | Registro aceptado | Registro aceptado | PASS |
+| CP-UNIT-025 | HU-SEG-04 | Bloquear áreas protegidas sin sesión | Alta | Usuario anónimo | Perfil y donación | Acceso denegado | Acceso denegado | PASS |
+| CP-UNIT-026 | HU-SEG-04 | Restringir donaciones por rol | Alta | Sesión iniciada | Donante, albergue y admin | Solo accede donante | Solo accede donante | PASS |
+| CP-UNIT-027 | HU-SEG-04 | Separar paneles por rol | Alta | Sesión iniciada | Tres roles y tres paneles | Cada rol abre solo su panel | Resultado esperado | PASS |
+| CP-UNIT-028 | HU-PER-01 | Permitir perfil a usuarios autenticados | Media | Sesión iniciada | Tres roles | Los tres acceden a su perfil | Resultado esperado | PASS |
 
 ## Procedimiento de ejecución
 
 1. Abrir una terminal en la carpeta `Proyectocalidad`.
 2. Ejecutar `npm install` si las dependencias aún no están instaladas.
 3. Ejecutar `npm run test:unit`.
-4. Verificar que Vitest indique todos los archivos y casos en estado `passed`.
+4. Verificar que Vitest indique **33 pruebas** en estado `passed` (los casos
+   parametrizados de CP-UNIT-005 se contabilizan por cada dato de entrada).
 
 ## Relación con TDD
 
