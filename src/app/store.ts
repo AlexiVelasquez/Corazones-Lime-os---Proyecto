@@ -6,7 +6,7 @@ export type Role = 'donante' | 'albergue' | 'admin';
 export interface Account { id: string; role: Role; name: string; surname: string; email: string; phone: string; district: string; password: string; notifications: boolean[]; photo?: string | null }
 export interface Donation { id: string; donor: string; donorName: string; shelter: string; category: string; description: string; quantity: number; condition: string; method: string; district: string; address: string; reference: string; time: string; date: string; status: 'Pendiente' | 'En tránsito' | 'Entregado' }
 export interface Need { id: string; shelter: string; description: string; category: string; active: boolean }
-export interface Shelter { id: string; name: string; district: string; status: 'Pendiente' | 'Aprobado' | 'Rechazado'; address?: string; description?: string; image?: string | null; latitude?: number | null; longitude?: number | null }
+export interface Shelter { id: string; name: string; district: string; status: 'Pendiente' | 'Aprobado' | 'Rechazado'; ruc?: string; address?: string; description?: string; image?: string | null; latitude?: number | null; longitude?: number | null }
 export interface MapLocation { id: string; title: string; district: string; address: string; latitude: number; longitude: number; reference?: string; schedule?: string; label?: string }
 export const ROLE_DEFINITIONS: Record<Role, { label: string; description: string; permissions: string[] }> = {
   donante: { label: 'Donante', description: 'Persona que entrega ayuda.', permissions: ['Registrar donaciones', 'Seguir entregas', 'Gestionar su perfil'] },
@@ -25,8 +25,8 @@ const initialShelters: Shelter[] = [
   { id: 'esperanza', name: 'Hogar de la Esperanza', district: 'San Juan de Lurigancho', status: 'Aprobado', address: 'Av. Los Jardines 450, San Juan de Lurigancho', description: 'Refugio y alimentación para niños y adolescentes.', image: '/assets/images/albergue-esperanza.jpg', latitude: -12.0153, longitude: -77.0063 },
   { id: 'patitas', name: 'Patitas Felices', district: 'Villa El Salvador', status: 'Aprobado', address: 'Av. Central 820, Villa El Salvador', description: 'Rescate y rehabilitación de perros y gatos.', image: '/assets/images/albergue-patitas.jpg', latitude: -12.2137, longitude: -76.9375 },
   { id: 'renacer', name: 'Renacer - Adulto Mayor', district: 'Comas', status: 'Aprobado', address: 'Jr. Primavera 180, Comas', description: 'Cuidado para adultos mayores en situación vulnerable.', image: '/assets/images/albergue-renacer.jpg', latitude: -11.936, longitude: -77.0558 },
-  { id: 'sanjose', name: 'Refugio San José', district: 'Los Olivos', status: 'Pendiente', address: 'Av. Universitaria 1550, Los Olivos', latitude: -11.9827, longitude: -77.0715 },
-  { id: 'nuevo', name: 'Hogar Esperanza', district: 'San Martín de Porres', status: 'Pendiente', address: 'Jr. Lima 240, San Martín de Porres', latitude: -12.0061, longitude: -77.0838 }
+  { id: 'sanjose', name: 'Refugio San José', district: 'Los Olivos', status: 'Pendiente', ruc: '20123456784', address: 'Av. Universitaria 1550, Los Olivos', description: 'Solicitud de incorporación para atender a familias vulnerables de Los Olivos.', latitude: -11.9827, longitude: -77.0715 },
+  { id: 'nuevo', name: 'Hogar Esperanza', district: 'San Martín de Porres', status: 'Pendiente', ruc: '20123456785', address: 'Jr. Lima 240, San Martín de Porres', description: 'Centro comunitario en proceso de validación para recibir donaciones.', latitude: -12.0061, longitude: -77.0838 }
 ];
 
 export const COLLECTION_POINTS: MapLocation[] = [
@@ -155,7 +155,7 @@ export class Store {
     };
     this.accounts.push(account);
     if (registration.role === 'albergue') {
-      this.shelters.push({ id, name: registration.shelterName.trim(), district: registration.district, status: 'Pendiente' });
+      this.shelters.push({ id, name: registration.shelterName.trim(), district: registration.district, status: 'Pendiente', ruc: registration.ruc.trim(), address: registration.address.trim(), description: registration.description.trim() });
     }
     this.userId = id;
     this.save();

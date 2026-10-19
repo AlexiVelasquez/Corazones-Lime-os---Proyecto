@@ -238,13 +238,14 @@ function bootstrap(PDO $db): array
         'name' => $row['nombre'],
         'district' => $row['distrito'],
         'status' => $row['estado'],
+        'ruc' => $row['ruc'],
         'address' => $row['direccion'],
         'description' => $row['descripcion'],
         'image' => $row['imagen'],
         'latitude' => $row['latitud'] !== null ? (float) $row['latitud'] : null,
         'longitude' => $row['longitud'] !== null ? (float) $row['longitud'] : null,
     ], $db->query(
-        'SELECT a.id, a.nombre, di.nombre AS distrito, a.estado, a.direccion,
+        'SELECT a.id, a.nombre, di.nombre AS distrito, a.estado, a.ruc, a.direccion,
                 a.descripcion, a.imagen, a.latitud, a.longitud
          FROM albergues a INNER JOIN distritos di ON di.id = a.distrito_id
          ORDER BY a.creado_en'
@@ -465,7 +466,18 @@ try {
                 'nombre' => $shelterName, 'ruc' => $ruc,
                 'descripcion' => $description, 'direccion' => $address,
             ]);
-            $shelter = ['id' => $id, 'name' => $shelterName, 'district' => (string) $data['district'], 'status' => 'Pendiente'];
+            $shelter = [
+                'id' => $id,
+                'name' => $shelterName,
+                'district' => (string) $data['district'],
+                'status' => 'Pendiente',
+                'ruc' => $ruc,
+                'address' => $address,
+                'description' => $description,
+                'image' => null,
+                'latitude' => null,
+                'longitude' => null,
+            ];
         }
         $db->commit();
         session_regenerate_id(true);
