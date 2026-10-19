@@ -1,4 +1,4 @@
-import { AccessRules, DonationRules, DonationStatusRules, MapRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
+import { AccessRules, AdminAccountRules, DonationRules, DonationStatusRules, MapRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
 
 describe('1. Pruebas de categoría de donación', () => {
   it('CP-UNIT-001 acepta la categoría Juguetes', () => {
@@ -175,7 +175,19 @@ describe('7. Pruebas de autorización de rutas', () => {
   });
 });
 
-describe('8. Pruebas de integración segura con Google Maps', () => {
+describe('8. Creación segura de administradores', () => {
+  const adminData = { name: 'Ana', surname: 'Torres', email: 'ana@calidad.pe', phone: '987654329', district: 'Lima Cercado', password: 'Admin123!', repeatPassword: 'Admin123!' };
+
+  it('CP-UNIT-051 permite crear administradores desde una cuenta admin', () => {
+    expect(AdminAccountRules.validate('admin', adminData).valid).toBe(true);
+  });
+
+  it('CP-UNIT-052 bloquea la creación desde otros roles', () => {
+    expect(AdminAccountRules.validate('donante', adminData).valid).toBe(false);
+  });
+});
+
+describe('9. Pruebas de integración segura con Google Maps', () => {
   it('CP-UNIT-047 acepta coordenadas geográficas válidas', () => {
     expect(MapRules.validCoordinates(-12.121231, -77.029722)).toBe(true);
   });

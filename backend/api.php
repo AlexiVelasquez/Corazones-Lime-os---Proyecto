@@ -335,7 +335,7 @@ try {
     $action = $_GET['action'] ?? 'health';
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     $getActions = ['health', 'bootstrap'];
-    $postActions = ['login', 'logout', 'register', 'createDonation', 'createNeed', 'updateNeed', 'updateDonationStatus', 'updateShelterStatus', 'saveMessage', 'updateProfile', 'changePassword'];
+    $postActions = ['login', 'logout', 'register', 'createAdmin', 'createDonation', 'createNeed', 'updateNeed', 'updateDonationStatus', 'updateShelterStatus', 'saveMessage', 'updateProfile', 'changePassword'];
 
     if ((!in_array($action, $getActions, true) && !in_array($action, $postActions, true))) {
         respond(['error' => 'Acción no encontrada.'], 404);
@@ -487,6 +487,51 @@ try {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         $account = current_user($db);
         respond(['account' => account_row($account), 'shelter' => $shelter, 'csrfToken' => csrf_token()], 201);
+    }
+
+    if ($action === 'createAdmin') {
+        require_role($db, ['admin']);
+        rate_limit('create_admin', 8, 600);
+        require_fields($data, ['name', 'surname', 'email', 'phone', 'district', 'password', 'repeatPassword']);
+        $name = trim((string) $data['name']);
+        $surname = trim((string) $data['surname']);
+        $email = strtolower(trim((string) $data['email']));
+        $phone = trim((string) $data['phone']);
+        $password = (string) $data['password'];
+        if (mb_strlen($name) < 2 || mb_strlen($name) > 100 || mb_strlen($surname) < 2 || mb_strlen($surname) > 100) respond(['error' => 'Ingresa nombres y apellidos válidos.'], 422);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) respond(['error' => 'Ingresa un correo electrónico válido.'], 422);
+        if (!preg_match('/^\+?[\d\s]{9,15}$/', $phone)) respond(['error' => 'Ingresa un teléfono válido.'], 422);
+        if (strlen($password) < 8 || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
+            respond(['error' => 'La contraseña debe tener 8 caracteres, mayúscula, minúscula y número.'], 422);
+        }
+        if ($password !== (string) $data['repeatPassword']) respond(['error' => 'Las contraseñas no coinciden.'], 422);
+        $districtId = district_id($db, (string) $data['district']);
+        if ($districtId === null) respond(['error' => 'El distrito seleccionado no existe.'], 422);
+        $duplicate = $db->prepare('SELECT COUNT(*) FROM usuarios WHERE correo = :correo');
+        $duplicate->execute(['correo' => $email]);
+        if ((int) $duplicate->fetchColumn() > 0) respond(['error' => 'El correo ya pertenece a otra cuenta.'], 409);
+        $roleId = $db->query('SELECT id FROM roles WHERE codigo = "admin"')->fetchColumn();
+        if ($roleId === false) respond(['error' => 'El rol administrador no está configurado.'], 500);
+        $id = 'adm_' . bin2hex(random_bytes(6));
+        $statement = $db->prepare(
+            'INSERT INTO usuarios (id, rol_id, distrito_id, nombres, apellidos, correo, telefono, clave_hash)
+             VALUES (:id, :rol, :distrito, :nombres, :apellidos, :correo, :telefono, :clave)'
+        );
+        $statement->execute([
+            'id' => $id, 'rol' => $roleId, 'distrito' => $districtId, 'nombres' => $name,
+            'apellidos' => $surname, 'correo' => $email, 'telefono' => $phone,
+            'clave' => password_for_storage($db, $password),
+        ]);
+        clear_rate_limit('create_admin');
+        $createdStatement = $db->prepare(
+            'SELECT u.id, r.codigo AS rol, u.nombres, u.apellidos, u.correo, u.telefono,
+                    COALESCE(di.nombre, "") AS distrito, u.foto,
+                    u.notificar_impacto, u.notificar_campanas, u.notificar_resumen
+             FROM usuarios u INNER JOIN roles r ON r.id = u.rol_id
+             LEFT JOIN distritos di ON di.id = u.distrito_id WHERE u.id = :id'
+        );
+        $createdStatement->execute(['id' => $id]);
+        respond(['account' => account_row($createdStatement->fetch())], 201);
     }
 
     if ($action === 'createDonation') {

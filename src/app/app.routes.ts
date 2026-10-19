@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { AdminPage, ContactPage, DonorPage, HomePage, LoginPage, ShelterDirectoryPage, ShelterPage, StepOnePage, StepThreePage, StepTwoPage } from './pages';
-import { DashboardDonationsPage, DashboardSheltersPage } from './dashboard-pages';
+import { AdminUsersPage, DashboardDonationsPage, DashboardSheltersPage } from './dashboard-pages';
 import { ProfileSettingsPage } from './profile-page';
 import { RegisterPage } from './register-page';
 import { areaGuard, authGuard, matchingPanelRoleGuard, publicOnlyGuard } from './auth.guard';
@@ -17,6 +17,7 @@ export const routes: Routes = [
   { path: 'panel/donante', component: DonorPage, title: 'Panel del donante', canActivate: [areaGuard('donor-panel')] },
   { path: 'panel/albergue', component: ShelterPage, title: 'Panel del albergue', canActivate: [areaGuard('shelter-panel')] },
   { path: 'panel/admin', component: AdminPage, title: 'Administración', canActivate: [areaGuard('admin-panel')] },
+  { path: 'panel/admin/usuarios', component: AdminUsersPage, title: 'Usuarios administradores', canActivate: [areaGuard('admin-panel')] },
   { path: 'panel/:role/donaciones', component: DashboardDonationsPage, title: 'Donaciones', canActivate: [matchingPanelRoleGuard] },
   { path: 'panel/:role/albergues', component: DashboardSheltersPage, title: 'Albergues', canActivate: [matchingPanelRoleGuard] },
   { path: 'perfil', component: ProfileSettingsPage, title: 'Mi perfil', canActivate: [authGuard] },

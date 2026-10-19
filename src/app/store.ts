@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { DatabaseApi, DatabaseApiError } from './database-api';
-import type { RegistrationData } from './business-rules';
+import type { AdminAccountData, RegistrationData } from './business-rules';
 
 export type Role = 'donante' | 'albergue' | 'admin';
 export interface Account { id: string; role: Role; name: string; surname: string; email: string; phone: string; district: string; password: string; notifications: boolean[]; photo?: string | null }
@@ -166,6 +166,31 @@ export class Store {
     }
     this.userId = id;
     this.save();
+    return { ok: true, message: '' };
+  }
+  async createAdmin(registration: AdminAccountData): Promise<{ ok: boolean; message: string }> {
+    if (this.user?.role !== 'admin') return { ok: false, message: 'Solo un administrador puede crear otra cuenta administrativa.' };
+    const email = registration.email.trim().toLowerCase();
+    if (this.accounts.some(account => account.email.toLowerCase() === email)) return { ok: false, message: 'El correo ya pertenece a otra cuenta.' };
+    const databaseWasConnected = this.databaseConnected();
+    try {
+      const result = await this.api.createAdmin({ ...registration, email });
+      this.accounts.push({ ...result.account, password: registration.password });
+      this.databaseConnected.set(true);
+      this.save();
+      this.notify('Cuenta administrativa creada correctamente.');
+      return { ok: true, message: '' };
+    } catch (error) {
+      if (error instanceof DatabaseApiError) return { ok: false, message: error.message };
+      if (databaseWasConnected) return { ok: false, message: 'No se pudo crear la cuenta en MySQL.' };
+    }
+    this.accounts.push({
+      id: `adm_${Date.now().toString(36)}`, role: 'admin', name: registration.name.trim(), surname: registration.surname.trim(),
+      email, phone: registration.phone.trim(), district: registration.district, password: registration.password,
+      notifications: [true, true, false],
+    });
+    this.save();
+    this.notify('Cuenta administrativa creada correctamente.');
     return { ok: true, message: '' };
   }
   async logout() {

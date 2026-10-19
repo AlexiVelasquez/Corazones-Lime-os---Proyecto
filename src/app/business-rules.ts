@@ -20,6 +20,16 @@ export interface RegistrationData {
   acceptTerms: boolean;
 }
 
+export interface AdminAccountData {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  district: string;
+  password: string;
+  repeatPassword: string;
+}
+
 export interface DonationFormData {
   category: string;
   description: string;
@@ -173,6 +183,22 @@ export class RegistrationRules {
       if (data.address.trim().length < 8) return invalid('Ingresa la dirección completa del albergue.');
       if (data.description.trim().length < 20) return invalid('Describe la labor del albergue con al menos 20 caracteres.');
     }
+    return valid();
+  }
+}
+
+/** La creación de administradores requiere una sesión administrativa activa. */
+export class AdminAccountRules {
+  static validate(actorRole: UserRole | null | undefined, data: AdminAccountData): ValidationResult {
+    if (actorRole !== 'admin') return invalid('Solo un administrador puede crear otra cuenta administrativa.');
+    if (data.name.trim().length < 2 || data.surname.trim().length < 2) return invalid('Ingresa nombres y apellidos válidos.');
+    if (!ProfileRules.isValidEmail(data.email)) return invalid('Ingresa un correo electrónico válido.');
+    if (!ProfileRules.isValidPhone(data.phone)) return invalid('Ingresa un teléfono de 9 a 15 dígitos.');
+    if (!data.district) return invalid('Selecciona el distrito del administrador.');
+    if (data.password.length < 8 || !/[a-z]/.test(data.password) || !/[A-Z]/.test(data.password) || !/\d/.test(data.password)) {
+      return invalid('La contraseña debe tener 8 caracteres, mayúscula, minúscula y número.');
+    }
+    if (data.password !== data.repeatPassword) return invalid('Las contraseñas no coinciden.');
     return valid();
   }
 }

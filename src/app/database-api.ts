@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import type { Account, Donation, MapLocation, Need, Shelter } from './store';
-import type { RegistrationData } from './business-rules';
+import type { AdminAccountData, RegistrationData } from './business-rules';
 
 export interface DatabaseBootstrap {
   accounts: Account[];
@@ -56,6 +56,7 @@ export class DatabaseApi {
   bootstrap() { return this.request<DatabaseBootstrap>('bootstrap', undefined, 1800); }
   login(email: string, password: string) { return this.request<{ account: Account; csrfToken: string }>('login', { email, password }); }
   register(registration: RegistrationData) { return this.request<{ account: Account; shelter?: Shelter; csrfToken: string }>('register', registration); }
+  createAdmin(registration: AdminAccountData) { return this.request<{ account: Account }>('createAdmin', registration); }
   logout() { return this.request<{ ok: boolean }>('logout', {}); }
   createDonation(donation: Donation) { return this.request<{ ok: boolean }>('createDonation', donation); }
   createNeed(need: Need) { return this.request<{ ok: boolean; id: string }>('createNeed', need); }

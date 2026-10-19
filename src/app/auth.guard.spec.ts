@@ -61,7 +61,7 @@ describe('8. Guards reales de Angular', () => {
   });
 
   it('CP-UNIT-036 declara guard en todas las rutas privadas', () => {
-    const privatePaths = ['donar', 'donar/detalle', 'donar/entrega', 'panel/donante', 'panel/albergue', 'panel/admin', 'panel/:role/donaciones', 'panel/:role/albergues', 'perfil'];
+    const privatePaths = ['donar', 'donar/detalle', 'donar/entrega', 'panel/donante', 'panel/albergue', 'panel/admin', 'panel/admin/usuarios', 'panel/:role/donaciones', 'panel/:role/albergues', 'perfil'];
     for (const path of privatePaths) {
       expect(routes.find(item => item.path === path)?.canActivate?.length, path).toBeGreaterThan(0);
     }

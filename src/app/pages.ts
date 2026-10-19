@@ -17,7 +17,7 @@ import { LocationMapComponent } from './location-map';
 
 @Component({ selector: 'dashboard-nav', standalone: true, imports: [RouterLink, RouterLinkActive], template: `
 <aside class="sidenav"><a class="brand" routerLink="/">♥ Corazones Limeños</a><small>Lima, Perú</small><span class="role-badge">{{store.roleDefinition?.label}}</span>
-  <nav><a [routerLink]="base" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><span class="material-symbols-outlined" aria-hidden="true">▦</span>Panel de control</a><a [routerLink]="base + '/donaciones'" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">♡</span>Donaciones</a><a [routerLink]="base + '/albergues'" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">▥</span>Albergues</a><a routerLink="/perfil" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">⚙</span>Configuración</a></nav>
+  <nav><a [routerLink]="base" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><span class="material-symbols-outlined" aria-hidden="true">▦</span>Panel de control</a><a [routerLink]="base + '/donaciones'" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">♡</span>Donaciones</a><a [routerLink]="base + '/albergues'" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">▥</span>Albergues</a>@if(store.user?.role === 'admin'){<a routerLink="/panel/admin/usuarios" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">♙</span>Usuarios admin</a>}<a routerLink="/perfil" routerLinkActive="active"><span class="material-symbols-outlined" aria-hidden="true">⚙</span>Configuración</a></nav>
   <div class="sidebar-actions"><button class="sidebar-action" (click)="store.toggleTheme()"><span class="material-symbols-outlined" aria-hidden="true">{{store.darkMode() ? '☀' : '☾'}}</span><span>{{store.darkMode() ? 'Modo claro' : 'Modo oscuro'}}</span></button><button class="sidebar-action logout" (click)="logout()"><span class="material-symbols-outlined" aria-hidden="true">⇥</span><span>Cerrar sesión</span></button>@if(store.user?.role === 'donante'){<a class="btn" routerLink="/donar">+ Nueva donación</a>}</div>
 </aside>`, inputs: ['base'] }) export class DashboardNav { base = '/'; store = inject(Store); private router = inject(Router); logout(){ this.store.logout(); void this.router.navigateByUrl('/'); } }
 
@@ -59,12 +59,15 @@ export class DonorPage extends PageBase { constructor(){super();if(this.s.user?.
 @Component({ standalone: true, imports: [DashboardNav, FormsModule, RouterLink], template: `
 <dashboard-nav base="/panel/albergue"/><main class="dashboard"><header class="dash-head"><div><span class="eyebrow">Panel del albergue</span><h1>Hola, {{s.user?.name}}</h1><p>Gestiona tus necesidades y confirma las donaciones que recibes.</p></div><div class="user-actions"><a routerLink="/perfil" class="avatar" title="Mi perfil">{{s.user?.name?.[0]}}</a></div></header>@if(s.currentShelter?.status !== 'Aprobado'){<section class="pending-access"><b>Cuenta pendiente de aprobación</b><span>El administrador debe validar el albergue antes de que publiques necesidades o recibas donaciones.</span></section>}<div class="bento"><section class="panel span4"><h2>Publicar necesidad</h2><p>Informa a la comunidad qué artículos urgen hoy.</p><form (ngSubmit)="publish()"><label>Artículo<input [(ngModel)]="need.description" name="need" maxlength="120" placeholder="Ej. 10 kg de arroz"></label><label>Categoría<select [(ngModel)]="need.category" name="category"><option>Alimentos no perecibles</option><option>Juguetes</option><option>Ropa de invierno</option><option>Útiles escolares</option></select></label><button class="btn full">Publicar</button></form></section><section class="panel span8"><h2>Necesidades activas</h2><div class="needs-list">@for(n of s.ownNeeds; track n.id){<article><span class="item-icon">{{n.category==='Juguetes'?'🧸':'🥫'}}</span><div><b>{{n.description}}</b><small>{{n.category}} · Visible en el directorio</small></div><button class="link-button" (click)="closeNeed(n.id)">Marcar cubierta</button></article>}@empty{<div class="empty">No hay necesidades activas.</div>}</div></section><section class="panel span12"><h2>Donaciones en camino</h2><div class="table-wrap"><table><thead><tr><th>Donante</th><th>Artículos</th><th>Fecha</th><th>Estado</th><th></th></tr></thead><tbody>@for(d of s.incoming; track d.id){<tr><td>{{d.donorName}}</td><td>{{d.description}}</td><td>{{d.date}}</td><td><span class="status">{{d.status}}</span></td><td><button class="btn small" [disabled]="d.status==='Entregado'" (click)="receive(d.id)">{{d.status==='Entregado'?'Recibida':'Confirmar recepción'}}</button></td></tr>}@empty{<tr><td colspan="5">Todavía no hay donaciones asignadas.</td></tr>}</tbody></table></div></section></div></main>` }) export class ShelterPage extends PageBase { constructor(){super();if(this.s.user?.role!=='albergue')this.go('/ingresar');} }
 
-@Component({ standalone: true, imports: [DashboardNav, LocationMapComponent], template: `
+@Component({ standalone: true, imports: [DashboardNav, LocationMapComponent, RouterLink], template: `
 <dashboard-nav base="/panel/admin"/>
 <main class="dashboard">
   <header class="dash-head"><div><span class="eyebrow">Administración</span><h1>Panel general</h1><p>Supervisa albergues, entregas y el impacto total de la plataforma.</p></div><div class="user-actions"><button class="btn outline" (click)="exportReport()">↓ Exportar reporte</button></div></header>
   <div class="stats admin-stats"><div><span>Ayuda movilizada</span><b>{{totalBoxes}} cajas</b><small>Acumulado registrado</small></div><div><span>Albergues activos</span><b>{{s.approvedShelters.length}}</b><small>Directorio público</small></div><div class="featured"><span>Donaciones</span><b>{{s.donations.length}}</b><small>{{pending}} pendientes de ruta</small></div></div>
   <div class="bento">
+    <section class="panel span12 priority-needs"><div class="section-title"><div><span class="eyebrow">Primera plana</span><h2>Necesidades por albergue</h2></div><a routerLink="/panel/admin/albergues">Ver albergues</a></div><div class="priority-grid">
+      @for(a of s.approvedShelters; track a.id){<article><div class="priority-head"><span class="item-icon">{{needsFor(a.id)[0]?.category === 'Juguetes' ? '🧸' : '🥫'}}</span><div><b>{{a.name}}</b><small>{{a.district}}</small></div></div><div class="priority-list">@for(n of needsFor(a.id); track n.id){<span><i></i>{{n.description}} <small>{{n.category}}</small></span>}@empty{<span class="muted">Sin necesidades urgentes publicadas.</span>}</div></article>}
+    </div></section>
     <section class="panel span5"><h2>Aprobación de albergues</h2>
       @for(a of s.pendingShelters; track a.id){
         <article class="approval"><div><b>{{a.name}}</b><small>{{a.district}}</small></div>
@@ -72,33 +75,48 @@ export class DonorPage extends PageBase { constructor(){super();if(this.s.user?.
           <button class="reject" type="button" (click)="decide(a.id,false)" [attr.aria-label]="'Rechazar ' + a.name" title="Rechazar">✕</button>
           <button class="accept" type="button" (click)="decide(a.id,true)" [attr.aria-label]="'Aprobar ' + a.name" title="Aprobar">✓</button>
         </article>
-      } @empty {<div class="empty">Todas las solicitudes fueron revisadas.</div>}
+      } @empty {<div class="empty compact-empty"><b>No hay solicitudes pendientes</b><span>Todas fueron revisadas. Consulta el historial debajo.</span></div>}
+      @if(reviewedShelters.length){<div class="reviewed-shelters"><h3>Historial de revisión</h3>@for(a of reviewedShelters; track a.id){<article class="approval reviewed"><div><b>{{a.name}}</b><small>{{a.district}} · {{a.status}}</small></div><button class="inspect" type="button" (click)="openReview(a.id)" [attr.aria-label]="'Ver detalles de ' + a.name" title="Ver detalles">👁</button></article>}</div>}
     </section>
     <section class="panel span7"><div class="section-title"><h2>Logística de entregas</h2><span>{{transit}} en tránsito</span></div><location-map [latitude]="adminLocation.latitude" [longitude]="adminLocation.longitude" [title]="adminLocation.title" [address]="adminLocation.address"/></section>
-    <section class="panel span12"><div class="section-title"><h2>Cola de donaciones</h2><span>{{pending}} por asignar</span></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Donante</th><th>Destino</th><th>Estado</th><th></th></tr></thead><tbody>@for(d of s.donations; track d.id){<tr><td>{{d.id}}</td><td>{{d.donorName}}</td><td>{{s.shelterName(d.shelter)}}</td><td><span class="status">{{d.status}}</span></td><td><button class="btn small" [disabled]="d.status!=='Pendiente'" (click)="dispatch(d.id)">{{d.status==='Pendiente'?'Asignar ruta':'Procesada'}}</button></td></tr>}</tbody></table></div></section>
+    <section class="panel span12"><div class="section-title"><h2>Cola de donaciones</h2><span>{{pending}} por asignar</span></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Donante</th><th>Destino</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>@for(d of s.donations; track d.id){<tr><td>{{d.id}}</td><td>{{d.donorName}}</td><td>{{s.shelterName(d.shelter)}}</td><td><span class="status" [class.done]="d.status==='Entregado'">{{d.status}}</span></td><td><button class="table-eye" type="button" (click)="openDonation(d.id)" [attr.aria-label]="'Ver detalle de la donación ' + d.id" title="Ver contenido">👁</button></td><td><button class="btn small" [disabled]="d.status!=='Pendiente'" (click)="dispatch(d.id)">{{d.status==='Pendiente'?'Asignar ruta':'Procesada'}}</button></td></tr>}@empty{<tr><td colspan="6"><div class="empty">No hay donaciones registradas.</div></td></tr>}</tbody></table></div></section>
   </div>
 </main>
-@if(selectedPendingShelter; as shelter){
+@if(reviewedShelterSelection; as shelter){
   <div class="review-overlay" role="presentation" (click)="closeReview()">
     <section class="review-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Detalles de ' + shelter.name" (click)="$event.stopPropagation()">
-      <header><div><span class="eyebrow">Solicitud pendiente</span><h2>{{shelter.name}}</h2><p>Revisa la información y la ubicación antes de tomar una decisión.</p></div><button class="review-close" type="button" (click)="closeReview()" aria-label="Cerrar detalles">✕</button></header>
+      <header><div><span class="eyebrow">{{shelter.status === 'Pendiente' ? 'Solicitud pendiente' : 'Solicitud ' + shelter.status.toLowerCase()}}</span><h2>{{shelter.name}}</h2><p>Información institucional y ubicación registrada.</p></div><button class="review-close" type="button" (click)="closeReview()" aria-label="Cerrar detalles">✕</button></header>
       <div class="review-grid"><div><small>Distrito</small><b>{{shelter.district}}</b></div><div><small>RUC</small><b>{{shelter.ruc || 'No registrado'}}</b></div><div class="review-wide"><small>Dirección declarada</small><b>{{s.shelterLocation(shelter.id).address}}</b></div><div class="review-wide"><small>Descripción</small><p>{{shelter.description || 'El albergue no registró una descripción adicional.'}}</p></div></div>
       <location-map [latitude]="s.shelterLocation(shelter.id).latitude" [longitude]="s.shelterLocation(shelter.id).longitude" [title]="shelter.name" [address]="s.shelterLocation(shelter.id).address"/>
       <p class="location-note">La ubicación se basa en las coordenadas registradas. Si aún no existen, se muestra una referencia aproximada del distrito.</p>
-      <footer class="review-actions"><button class="btn outline review-reject" type="button" (click)="decide(shelter.id,false)">Rechazar solicitud</button><button class="btn" type="button" (click)="decide(shelter.id,true)">Aprobar albergue</button></footer>
+      @if(shelter.status === 'Pendiente'){<footer class="review-actions"><button class="btn outline review-reject" type="button" (click)="decide(shelter.id,false)">Rechazar solicitud</button><button class="btn" type="button" (click)="decide(shelter.id,true)">Aprobar albergue</button></footer>}
     </section>
   </div>
+}
+@if(selectedDonation; as donation){
+  <div class="review-overlay" role="presentation" (click)="closeDonation()"><section class="review-dialog donation-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle de donación ' + donation.id" (click)="$event.stopPropagation()">
+    <header><div><span class="eyebrow">Donación {{donation.status}}</span><h2>{{donation.id}}</h2><p>Contenido y datos logísticos registrados por el donante.</p></div><button class="review-close" type="button" (click)="closeDonation()" aria-label="Cerrar detalle">✕</button></header>
+    <div class="donation-summary"><span class="donation-icon">{{donation.category==='Juguetes'?'🧸':'🥫'}}</span><div><small>{{donation.category}}</small><h3>{{donation.description}}</h3><span>{{donation.quantity}} caja(s) · Estado: {{donation.condition || 'No especificado'}}</span></div></div>
+    <div class="review-grid"><div><small>Donante</small><b>{{donation.donorName}}</b></div><div><small>Destino</small><b>{{s.shelterName(donation.shelter)}}</b></div><div><small>Fecha</small><b>{{donation.date}}</b></div><div><small>Método</small><b>{{donation.method==='pickup'?'Recojo a domicilio':'Punto de recojo'}}</b></div><div class="review-wide"><small>Dirección o punto</small><b>{{donation.address || donation.district || 'No especificado'}}</b></div><div class="review-wide"><small>Referencia y horario</small><p>{{donation.reference || 'Sin referencia'}} · {{donation.time || 'Sin horario preferido'}}</p></div></div>
+    @if(donation.status === 'Pendiente'){<footer class="review-actions"><button class="btn" type="button" (click)="dispatch(donation.id); closeDonation()">Asignar ruta</button></footer>}
+  </section></div>
 }` })
 export class AdminPage extends PageBase {
   selectedShelterId = '';
+  selectedDonationId = '';
   constructor(){super();if(this.s.user?.role!=='admin')this.go('/ingresar');}
   get totalBoxes(){return this.s.donations.reduce((n,d)=>n+d.quantity,0)}
   get pending(){return this.s.donations.filter(d=>d.status==='Pendiente').length}
   get transit(){return this.s.donations.filter(d=>d.status==='En tránsito').length}
   get adminLocation(){const active=this.s.donations.find(d=>d.status==='En tránsito')??this.s.donations.find(d=>d.status==='Pendiente');return this.s.shelterLocation(active?.shelter??'esperanza');}
-  get selectedPendingShelter(){return this.s.pendingShelters.find(item=>item.id===this.selectedShelterId)??null;}
+  get reviewedShelters(){return this.s.shelters.filter(item=>item.status!=='Pendiente').slice().reverse().slice(0,5);}
+  get reviewedShelterSelection(){return this.s.shelters.find(item=>item.id===this.selectedShelterId)??null;}
+  get selectedDonation(){return this.s.donations.find(item=>item.id===this.selectedDonationId)??null;}
+  needsFor(id:string){return this.s.needs.filter(item=>item.shelter===id&&item.active).slice(0,3);}
   openReview(id:string){this.selectedShelterId=id;}
   closeReview(){this.selectedShelterId='';}
+  openDonation(id:string){this.selectedDonationId=id;}
+  closeDonation(){this.selectedDonationId='';}
   async decide(id:string,approved:boolean){await this.approve(id,approved);this.closeReview();}
 }
 

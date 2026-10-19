@@ -62,13 +62,15 @@ Archivos principales:
 | CP-UNIT-042 | HU-LOGIN-01 | Evitar doble envío | Alta | Login en curso | Dos envíos seguidos | Una solicitud | Una solicitud | PASS |
 | CP-UNIT-043 | HU-SEG-05 | Renovar CSRF expirado | Alta | Token expirado | Respuesta `CSRF_INVALID` | Renueva y reintenta una vez | Resultado esperado | PASS |
 | CP-UNIT-044 | HU-SEG-05 | No reintentar un 403 de rol | Alta | Rol sin permiso | Respuesta `FORBIDDEN` | Propaga el rechazo | Resultado esperado | PASS |
+| CP-UNIT-051 | HU-ADM-01 | Crear cuenta administrativa | Alta | Sesión con rol administrador | Datos válidos | Cuenta admin creada | Resultado esperado | PASS |
+| CP-UNIT-052 | HU-ADM-01 | Bloquear alta admin por otro rol | Alta | Sesión con rol donante | Datos válidos | Operación rechazada | Resultado esperado | PASS |
 
 ## Procedimiento de ejecución
 
 1. Abrir una terminal en la carpeta `Proyectocalidad`.
 2. Ejecutar `npm install` si las dependencias aún no están instaladas.
 3. Ejecutar `npm run test:unit`.
-4. Verificar que Vitest indique **49 pruebas** en estado `passed` (los casos
+4. Verificar que Vitest indique **57 pruebas** en estado `passed` (los casos
    parametrizados de CP-UNIT-005 se contabilizan por cada dato de entrada).
 
 ## Relación con TDD
