@@ -53,10 +53,11 @@ describe('8. Guards reales de Angular', () => {
     expect((result as ReturnType<Router['parseUrl']>).toString()).toBe('/panel/donante');
   });
 
-  it('CP-UNIT-035 evita que una sesión activa vuelva al login', async () => {
+  it('CP-UNIT-035 evita que una sesión activa vuelva a una página pública', async () => {
     store.user = donor;
-    const result = await TestBed.runInInjectionContext(() => publicOnlyGuard(route(), state('/ingresar')));
+    const result = await TestBed.runInInjectionContext(() => publicOnlyGuard(route(), state('/')));
     expect((result as ReturnType<Router['parseUrl']>).toString()).toBe('/panel/donante');
+    expect(store.notify).toHaveBeenCalledWith(expect.stringContaining('Cierra sesión primero'));
   });
 
   it('CP-UNIT-036 declara guard en todas las rutas privadas', () => {
@@ -64,5 +65,18 @@ describe('8. Guards reales de Angular', () => {
     for (const path of privatePaths) {
       expect(routes.find(item => item.path === path)?.canActivate?.length, path).toBeGreaterThan(0);
     }
+  });
+
+  it('CP-UNIT-045 protege las páginas públicas cuando ya existe una sesión', () => {
+    const publicPaths = ['', 'albergues', 'contacto', 'ingresar', 'registro'];
+    for (const path of publicPaths) {
+      expect(routes.find(item => item.path === path)?.canActivate).toContain(publicOnlyGuard);
+    }
+  });
+
+  it('CP-UNIT-046 permite abrir la landing cuando no hay sesión', async () => {
+    const result = await TestBed.runInInjectionContext(() => publicOnlyGuard(route(), state('/')));
+    expect(result).toBe(true);
+    expect(store.notify).not.toHaveBeenCalled();
   });
 });

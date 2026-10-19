@@ -28,7 +28,9 @@ export const publicOnlyGuard: CanActivateFn = async () => {
   const store = inject(Store);
   const router = inject(Router);
   await store.ready;
-  return store.user ? router.parseUrl(store.panel) : true;
+  if (!store.user) return true;
+  store.notify('Tienes una sesión activa. Cierra sesión primero para volver a las páginas públicas.');
+  return router.parseUrl(store.panel);
 };
 
 export const matchingPanelRoleGuard: CanActivateFn = async (route: ActivatedRouteSnapshot, state) => {

@@ -6,9 +6,9 @@ import { RegisterPage } from './register-page';
 import { areaGuard, authGuard, matchingPanelRoleGuard, publicOnlyGuard } from './auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: HomePage, title: 'Corazones Limeños — Inicio' },
-  { path: 'albergues', component: ShelterDirectoryPage, title: 'Albergues de Lima' },
-  { path: 'contacto', component: ContactPage, title: 'Contacto y soporte' },
+  { path: '', component: HomePage, title: 'Corazones Limeños — Inicio', canActivate: [publicOnlyGuard] },
+  { path: 'albergues', component: ShelterDirectoryPage, title: 'Albergues de Lima', canActivate: [publicOnlyGuard] },
+  { path: 'contacto', component: ContactPage, title: 'Contacto y soporte', canActivate: [publicOnlyGuard] },
   { path: 'donar', component: StepOnePage, title: 'Donar — Categoría', canActivate: [areaGuard('donation')] },
   { path: 'donar/detalle', component: StepTwoPage, title: 'Donar — Detalle', canActivate: [areaGuard('donation')] },
   { path: 'donar/entrega', component: StepThreePage, title: 'Donar — Entrega', canActivate: [areaGuard('donation')] },
