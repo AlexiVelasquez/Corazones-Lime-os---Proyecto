@@ -18,10 +18,10 @@ C:\xampp\php\php.exe -l backend\api.php
 La suite cubre reglas de donación, registro, perfiles, estados, matriz de
 permisos, guards reales de Angular, login, retorno seguro y renovación CSRF.
 
-Resultado de la revisión del 18 de octubre de 2026:
+Resultado de la revisión del 19 de octubre de 2026:
 
 - 5 archivos de pruebas aprobados.
-- 49 pruebas automatizadas aprobadas.
+- 55 pruebas automatizadas aprobadas.
 - Compilación de producción aprobada.
 - Sintaxis de `backend/api.php` aprobada.
 
@@ -40,6 +40,8 @@ Resultado de la revisión del 18 de octubre de 2026:
 | SYS-09 | Perfil | Editar datos y contraseña | Guarda únicamente el perfil autenticado. |
 | SYS-10 | Registro donante | Datos completos | Crea cuenta de donante e inicia sesión. |
 | SYS-11 | Registro albergue | Datos institucionales completos | Crea cuenta y estado Pendiente. |
+| SYS-12 | Mapa de albergue | Elegir una sede del directorio | Muestra sus coordenadas, dirección y accesos a Google Maps. |
+| SYS-13 | Mapa de entrega | Elegir un punto de recojo | Actualiza el mapa, referencia y horario del punto. |
 
 Durante la verificación en navegador se ejecutaron SYS-01 y SYS-06. El login
 abrió `/panel/donante` y la donación **Juguetes educativos en excelente estado**

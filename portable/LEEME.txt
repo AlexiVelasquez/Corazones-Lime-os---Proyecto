@@ -4,6 +4,9 @@ CORAZONES LIMEÑOS - VERSIÓN PORTABLE
 Esta carpeta permite presentar el sistema en una computadora Windows sin
 instalar Angular CLI, Node.js ni paquetes de internet.
 
+El sistema local puede abrirse sin internet. Los mapas de Google y los enlaces
+para calcular rutas sí necesitan conexión a internet.
+
 INSTRUCCIONES
 
 1. Copia la carpeta "portable" completa a la computadora.

@@ -1,4 +1,4 @@
-import { AccessRules, DonationRules, DonationStatusRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
+import { AccessRules, DonationRules, DonationStatusRules, MapRules, ProfileRules, RegistrationData, RegistrationRules } from './business-rules';
 
 describe('1. Pruebas de categoría de donación', () => {
   it('CP-UNIT-001 acepta la categoría Juguetes', () => {
@@ -172,5 +172,24 @@ describe('7. Pruebas de autorización de rutas', () => {
     expect(AccessRules.safeReturnUrl('donante', '//sitio-malicioso.test')).toBeNull();
     expect(AccessRules.safeReturnUrl('albergue', '/panel/admin')).toBeNull();
     expect(AccessRules.safeReturnUrl('admin', '/donar')).toBeNull();
+  });
+});
+
+describe('8. Pruebas de integración segura con Google Maps', () => {
+  it('CP-UNIT-047 acepta coordenadas geográficas válidas', () => {
+    expect(MapRules.validCoordinates(-12.121231, -77.029722)).toBe(true);
+  });
+
+  it('CP-UNIT-048 sustituye coordenadas inválidas por el centro de Lima', () => {
+    expect(MapRules.safeCoordinates(Number.NaN, 400)).toEqual(MapRules.limaCenter);
+  });
+
+  it('CP-UNIT-049 genera enlaces HTTPS de búsqueda y ruta en Google Maps', () => {
+    expect(MapRules.searchUrl(-12.121231, -77.029722)).toMatch(/^https:\/\/www\.google\.com\/maps\/search\/\?api=1/);
+    expect(MapRules.directionsUrl(-12.121231, -77.029722)).toContain('destination=-12.121231%2C-77.029722');
+  });
+
+  it('CP-UNIT-050 limita el zoom del mapa incrustado', () => {
+    expect(MapRules.embedUrl(-12.121231, -77.029722, 99)).toContain('&z=19&');
   });
 });

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { DashboardNav, shelterImages } from './pages';
+import { DashboardNav } from './pages';
 import { PageBase } from './page-base';
+import { LocationMapComponent } from './location-map';
 
 @Component({
   standalone: true,
@@ -39,14 +40,14 @@ export class DashboardDonationsPage extends PageBase {
 
 @Component({
   standalone: true,
-  imports: [DashboardNav, RouterLink],
+  imports: [DashboardNav, RouterLink, LocationMapComponent],
   template: `
     <dashboard-nav [base]="s.panel" />
     <main class="dashboard">
       <header class="dash-head"><div><span class="eyebrow">Red solidaria</span><h1>Albergues</h1><p>Explora los centros aprobados y sus necesidades sin abandonar tu espacio de trabajo.</p></div><a class="btn outline" routerLink="/albergues">Ver directorio público</a></header>
       <div class="cards dashboard-shelters">
-        @for (a of s.approvedShelters; track a.id; let i = $index) {
-          <article class="card dashboard-shelter-card"><img class="dashboard-shelter-image" [src]="images[i % images.length]" [alt]="a.name"><div class="dashboard-shelter-body"><span class="location">● {{ a.district }}</span><h2>{{ a.name }}</h2><div class="needs"><b>Necesidades activas</b>@for (n of needsFor(a.id); track n.id) { <span>{{ n.description }}</span> } @empty { <span>Sin necesidades urgentes publicadas</span> }</div>
+        @for (a of s.approvedShelters; track a.id) {
+          <article class="card dashboard-shelter-card"><img class="dashboard-shelter-image" [src]="s.shelterImage(a.id)" [alt]="a.name"><div class="dashboard-shelter-body"><span class="location">● {{ a.district }}</span><h2>{{ a.name }}</h2><small class="shelter-address">{{ s.shelterLocation(a.id).address }}</small><div class="needs"><b>Necesidades activas</b>@for (n of needsFor(a.id); track n.id) { <span>{{ n.description }}</span> } @empty { <span>Sin necesidades urgentes publicadas</span> }</div><location-map [latitude]="s.shelterLocation(a.id).latitude" [longitude]="s.shelterLocation(a.id).longitude" [title]="a.name" [address]="s.shelterLocation(a.id).address" [compact]="true"/>
             @if (s.user?.role === 'donante') { <button class="btn full" (click)="start(a.id)">Donar a este albergue</button> }
             @if (s.user?.role === 'albergue' && a.id === s.user?.id) { <span class="own-shelter">Este es tu albergue</span> }
           </div></article>
@@ -57,7 +58,6 @@ export class DashboardDonationsPage extends PageBase {
   `,
 })
 export class DashboardSheltersPage extends PageBase {
-  images = shelterImages;
   constructor() { super(); if (!this.s.user) this.go('/ingresar'); }
   needsFor(id: string) { return this.s.needs.filter(n => n.shelter === id && n.active); }
 }

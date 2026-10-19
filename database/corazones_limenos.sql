@@ -82,6 +82,8 @@ CREATE TABLE albergues (
   aforo INT UNSIGNED NULL,
   estado ENUM('Pendiente', 'Aprobado', 'Rechazado') NOT NULL DEFAULT 'Pendiente',
   imagen VARCHAR(255) NULL,
+  latitud DECIMAL(10,7) NULL,
+  longitud DECIMAL(10,7) NULL,
   creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_albergue_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
@@ -366,13 +368,13 @@ VALUES
   ('admin', 3, 2, 'María', 'García', 'admin@calidad.pe', '987654323', SHA2('Demo123!', 256), 1, 1, 0);
 
 INSERT INTO albergues
-  (id, usuario_id, distrito_id, nombre, ruc, descripcion, direccion, aforo, estado, imagen)
+  (id, usuario_id, distrito_id, nombre, ruc, descripcion, direccion, aforo, estado, imagen, latitud, longitud)
 VALUES
-  ('esperanza', 'esperanza', 4, 'Hogar de la Esperanza', '20123456781', 'Refugio y alimentación para niños y adolescentes.', 'Av. Los Jardines 450', 80, 'Aprobado', '/assets/images/albergue-esperanza.jpg'),
-  ('patitas', 'patitas', 5, 'Patitas Felices', '20123456782', 'Rescate y rehabilitación de perros y gatos.', 'Av. Central 820', 120, 'Aprobado', '/assets/images/albergue-patitas.jpg'),
-  ('renacer', 'renacer', 3, 'Renacer - Adulto Mayor', '20123456783', 'Cuidado para adultos mayores en situación vulnerable.', 'Jr. Primavera 180', 60, 'Aprobado', '/assets/images/albergue-renacer.jpg'),
-  ('sanjose', NULL, 6, 'Refugio San José', '20123456784', 'Solicitud pendiente de revisión.', 'Av. Universitaria 1550', 45, 'Pendiente', NULL),
-  ('nuevo', NULL, 7, 'Hogar Esperanza', '20123456785', 'Solicitud pendiente de revisión.', 'Jr. Lima 240', 50, 'Pendiente', NULL);
+  ('esperanza', 'esperanza', 4, 'Hogar de la Esperanza', '20123456781', 'Refugio y alimentación para niños y adolescentes.', 'Av. Los Jardines 450', 80, 'Aprobado', '/assets/images/albergue-esperanza.jpg', -12.0153000, -77.0063000),
+  ('patitas', 'patitas', 5, 'Patitas Felices', '20123456782', 'Rescate y rehabilitación de perros y gatos.', 'Av. Central 820', 120, 'Aprobado', '/assets/images/albergue-patitas.jpg', -12.2137000, -76.9375000),
+  ('renacer', 'renacer', 3, 'Renacer - Adulto Mayor', '20123456783', 'Cuidado para adultos mayores en situación vulnerable.', 'Jr. Primavera 180', 60, 'Aprobado', '/assets/images/albergue-renacer.jpg', -11.9360000, -77.0558000),
+  ('sanjose', NULL, 6, 'Refugio San José', '20123456784', 'Solicitud pendiente de revisión.', 'Av. Universitaria 1550', 45, 'Pendiente', NULL, -11.9827000, -77.0715000),
+  ('nuevo', NULL, 7, 'Hogar Esperanza', '20123456785', 'Solicitud pendiente de revisión.', 'Jr. Lima 240', 50, 'Pendiente', NULL, -12.0061000, -77.0838000);
 
 INSERT INTO categorias_articulo (id, nombre, descripcion, icono) VALUES
   (1, 'Juguetes', 'Juguetes nuevos o en excelente estado.', '🧸'),

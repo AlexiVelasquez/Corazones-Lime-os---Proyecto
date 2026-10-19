@@ -27,8 +27,10 @@ computadora Windows:
 3. Haz doble clic en `iniciar.bat`.
 
 El sistema abrirá `http://127.0.0.1:8080/` y funcionará sin Angular CLI,
-Node.js, `npm install` ni conexión a internet. Debe copiarse la carpeta
-`portable` completa; no se debe abrir `app/index.html` directamente.
+Node.js ni `npm install`. Las funciones locales siguen disponibles sin
+internet; los mapas de Google requieren conexión para cargar la cartografía.
+Debe copiarse la carpeta `portable` completa; no se debe abrir
+`app/index.html` directamente.
 
 También se puede ejecutar `INICIAR_SIN_INSTALAR.bat`, ubicado en la raíz del
 repositorio. No ejecutes `npm ci` en una computadora sin internet.
@@ -88,6 +90,8 @@ La matriz completa de permisos y el flujo de aprobación se encuentran en
   administrativa de albergues.
 - Protección de rutas y permisos en el servidor para donantes, albergues y
   administradores.
+- Mapas reales por albergue, sede y punto de recojo, con accesos directos para
+  abrir la ubicación o calcular la ruta en Google Maps.
 
 Al ejecutar la versión portable sin MySQL, los datos de demostración se
 guardan en `localStorage`. Con `INICIAR_CON_BASE_DE_DATOS.bat` o
@@ -102,7 +106,7 @@ npm run test:unit
 
 Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/app/business-rules.spec.ts`. La documentación IEEE 829 se encuentra en `docs/pruebas-unitarias-ieee829.md`.
 
-La revisión para la evaluación T2 incluye 49 pruebas automatizadas, pruebas de
+La revisión para la evaluación T2 incluye 55 pruebas automatizadas, pruebas de
 guards, login y CSRF, más una matriz de pruebas funcionales. Las evidencias se
 encuentran en [`docs/VALIDACION-RUBRICA-T2.md`](docs/VALIDACION-RUBRICA-T2.md),
 [`docs/PRUEBAS-SISTEMA-T2.md`](docs/PRUEBAS-SISTEMA-T2.md) y
@@ -157,6 +161,10 @@ respuestas sin detalles internos. Los servidores Angular y portable incluyen
 CSP y protección contra clickjacking. Para una base ya importada, ejecuta una
 vez `database/migrations/002_security_hardening.sql`; las contraseñas antiguas
 se migran automáticamente a `password_hash` al iniciar sesión.
+
+Los mapas solo aceptan coordenadas válidas y vuelven al centro de Lima si la
+base contiene una ubicación incompleta. Para una base importada antes de esta
+mejora, ejecuta una vez `database/migrations/003_google_maps_locations.sql`.
 
 La matriz completa y las instrucciones de prueba están en
 [`docs/SEGURIDAD-Y-ROLES.md`](docs/SEGURIDAD-Y-ROLES.md).

@@ -32,7 +32,7 @@ function Get-ContentType([string]$Path) {
     }
 }
 
-$securityHeaders = "Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 http://10.0.2.2:8081 http://10.242.146.148:8081`r`nX-Frame-Options: DENY`r`nX-Content-Type-Options: nosniff`r`nReferrer-Policy: strict-origin-when-cross-origin`r`nPermissions-Policy: camera=(), microphone=(), geolocation=()`r`n"
+$securityHeaders = "Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; frame-src https://www.google.com https://maps.google.com; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:8081 http://127.0.0.1:8081 http://10.0.2.2:8081 http://10.242.146.148:8081`r`nX-Frame-Options: DENY`r`nX-Content-Type-Options: nosniff`r`nReferrer-Policy: strict-origin-when-cross-origin`r`nPermissions-Policy: camera=(), microphone=(), geolocation=()`r`n"
 
 $listenIp = if ($ListenAddress -eq '0.0.0.0') {
     [Net.IPAddress]::Any
@@ -60,7 +60,7 @@ if ($ListenAddress -eq '0.0.0.0') {
         Write-Host "Desde Kali con puente/Host-Only: http://$($address.IPAddressToString):$Port/" -ForegroundColor Cyan
     }
 }
-Write-Host 'Esta version no necesita Angular CLI ni acceso a internet.'
+Write-Host 'Esta version no necesita Angular CLI. Los mapas requieren internet.'
 Write-Host 'Para detenerla, presiona Ctrl+C o cierra esta ventana.'
 Write-Host ''
 if (-not $NoBrowser) {

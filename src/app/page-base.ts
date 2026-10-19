@@ -18,6 +18,8 @@ export class PageBase {
   showPassword = false;
   filterStatus = 'Todos';
   get filteredDonations() { return this.s.donations.filter(d => this.filterStatus === 'Todos' || d.status === this.filterStatus); }
+  get selectedShelter() { return this.s.shelterLocation(this.s.draft.shelter); }
+  get selectedCollectionPoint() { return this.s.collectionPoint(this.s.draft.district); }
   go(path: string) { void this.router.navigateByUrl(path); }
   start(shelter = 'esperanza', category = '') { this.s.draft = { ...blankDraft(), shelter, category }; this.s.save(); this.go('/donar'); }
   next(step: number) {

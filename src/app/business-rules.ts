@@ -36,6 +36,11 @@ export interface ValidationResult {
   message: string;
 }
 
+export interface SafeCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
 const valid = (): ValidationResult => ({ valid: true, message: '' });
 const invalid = (message: string): ValidationResult => ({ valid: false, message });
 
@@ -169,5 +174,40 @@ export class RegistrationRules {
       if (data.description.trim().length < 20) return invalid('Describe la labor del albergue con al menos 20 caracteres.');
     }
     return valid();
+  }
+}
+
+/** Construye enlaces de Google Maps únicamente a partir de coordenadas numéricas validadas. */
+export class MapRules {
+  static readonly limaCenter: SafeCoordinates = { latitude: -12.0464, longitude: -77.0428 };
+
+  static validCoordinates(latitude: unknown, longitude: unknown): boolean {
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+    return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  }
+
+  static safeCoordinates(latitude: unknown, longitude: unknown): SafeCoordinates {
+    return this.validCoordinates(latitude, longitude)
+      ? { latitude: Number(latitude), longitude: Number(longitude) }
+      : this.limaCenter;
+  }
+
+  static searchUrl(latitude: unknown, longitude: unknown): string {
+    const point = this.safeCoordinates(latitude, longitude);
+    const query = encodeURIComponent(`${point.latitude},${point.longitude}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}&utm_source=corazones_limenos&utm_campaign=sede`;
+  }
+
+  static directionsUrl(latitude: unknown, longitude: unknown): string {
+    const point = this.safeCoordinates(latitude, longitude);
+    const destination = encodeURIComponent(`${point.latitude},${point.longitude}`);
+    return `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving&utm_source=corazones_limenos&utm_campaign=como_llegar`;
+  }
+
+  static embedUrl(latitude: unknown, longitude: unknown, zoom = 15): string {
+    const point = this.safeCoordinates(latitude, longitude);
+    const safeZoom = Math.max(10, Math.min(19, Number.isInteger(zoom) ? zoom : 15));
+    return `https://maps.google.com/maps?q=${point.latitude},${point.longitude}&z=${safeZoom}&output=embed`;
   }
 }

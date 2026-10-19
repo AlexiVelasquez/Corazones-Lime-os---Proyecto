@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import type { Account, Donation, Need, Shelter } from './store';
+import type { Account, Donation, MapLocation, Need, Shelter } from './store';
 import type { RegistrationData } from './business-rules';
 
 export interface DatabaseBootstrap {
   accounts: Account[];
   shelters: Shelter[];
+  collectionPoints: MapLocation[];
   donations: Donation[];
   needs: Need[];
   csrfToken: string;

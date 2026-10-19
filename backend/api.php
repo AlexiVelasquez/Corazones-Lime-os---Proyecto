@@ -238,10 +238,39 @@ function bootstrap(PDO $db): array
         'name' => $row['nombre'],
         'district' => $row['distrito'],
         'status' => $row['estado'],
+        'address' => $row['direccion'],
+        'description' => $row['descripcion'],
+        'image' => $row['imagen'],
+        'latitude' => $row['latitud'] !== null ? (float) $row['latitud'] : null,
+        'longitude' => $row['longitud'] !== null ? (float) $row['longitud'] : null,
     ], $db->query(
-        'SELECT a.id, a.nombre, di.nombre AS distrito, a.estado
+        'SELECT a.id, a.nombre, di.nombre AS distrito, a.estado, a.direccion,
+                a.descripcion, a.imagen, a.latitud, a.longitud
          FROM albergues a INNER JOIN distritos di ON di.id = a.distrito_id
          ORDER BY a.creado_en'
+    )->fetchAll());
+
+    $collectionPoints = array_map(static fn(array $row): array => [
+        'id' => 'PR-' . $row['id'],
+        'title' => $row['nombre'],
+        'district' => $row['distrito'],
+        'address' => $row['direccion'],
+        'reference' => $row['referencia'],
+        'schedule' => $row['horario'],
+        'latitude' => (float) $row['latitud'],
+        'longitude' => (float) $row['longitud'],
+        'label' => match ((int) $row['id']) {
+            1 => 'Miraflores — Sede Central',
+            2 => 'San Isidro — Centro Comunitario',
+            3 => 'Santiago de Surco — Punto Aliado',
+            4 => 'Lima Cercado — Punto Aliado',
+            default => $row['distrito'] . ' — ' . $row['nombre'],
+        },
+    ], $db->query(
+        'SELECT p.id, p.nombre, p.direccion, p.referencia, p.horario,
+                p.latitud, p.longitud, di.nombre AS distrito
+         FROM puntos_recojo p INNER JOIN distritos di ON di.id = p.distrito_id
+         WHERE p.activo = 1 ORDER BY p.nombre'
     )->fetchAll());
 
     $donationRows = [];
@@ -297,7 +326,7 @@ function bootstrap(PDO $db): array
          ORDER BY n.creado_en DESC'
     )->fetchAll());
 
-    return [...compact('accounts', 'shelters', 'donations', 'needs'), 'csrfToken' => csrf_token()];
+    return [...compact('accounts', 'shelters', 'collectionPoints', 'donations', 'needs'), 'csrfToken' => csrf_token()];
 }
 
 try {
