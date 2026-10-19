@@ -1,7 +1,7 @@
 import { Directive, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store, blankDraft, Role } from './store';
-import { DonationRules, DonationStatusRules, ProfileRules } from './business-rules';
+import { AccessRules, DonationRules, DonationStatusRules, ProfileRules } from './business-rules';
 
 @Directive()
 export class PageBase {
@@ -14,6 +14,7 @@ export class PageBase {
   profile = { ...this.s.user, notifications: [...(this.s.user?.notifications ?? [true, true, false])] };
   currentPassword = ''; newPassword = ''; repeatPassword = '';
   email = ''; password = ''; loginError = '';
+  loginLoading = false;
   showPassword = false;
   filterStatus = 'Todos';
   get filteredDonations() { return this.s.donations.filter(d => this.filterStatus === 'Todos' || d.status === this.filterStatus); }
@@ -44,10 +45,19 @@ export class PageBase {
   }
   async login() {
     this.s.message.set('');
-    if (!await this.s.login(this.email, this.password)) { this.loginError = this.s.message() || 'Correo o contraseña incorrectos.'; return; }
+    this.loginError = '';
+    if (!ProfileRules.isValidEmail(this.email) || !this.password) {
+      this.loginError = 'Ingresa un correo válido y tu contraseña.';
+      return;
+    }
+    if (this.loginLoading) return;
+    this.loginLoading = true;
+    const authenticated = await this.s.login(this.email.trim(), this.password);
+    this.loginLoading = false;
+    if (!authenticated) { this.loginError = this.s.message() || 'Correo o contraseña incorrectos.'; return; }
     const dest = new URLSearchParams(location.search).get('returnUrl');
-    const safeDonationReturn = Boolean(dest && /^\/donar(?:\/detalle|\/entrega)?$/.test(dest));
-    this.go(safeDonationReturn && this.s.user?.role === 'donante' ? dest! : this.s.panel);
+    const safeReturn = this.s.user ? AccessRules.safeReturnUrl(this.s.user.role, dest) : null;
+    this.go(safeReturn ?? this.s.panel);
   }
   fill(role: Role) { const a = this.s.accounts.find(a => a.role === role)!; this.email = a.email; this.password = a.password; }
   async publish() {

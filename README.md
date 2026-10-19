@@ -102,6 +102,14 @@ npm run test:unit
 
 Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/app/business-rules.spec.ts`. La documentación IEEE 829 se encuentra en `docs/pruebas-unitarias-ieee829.md`.
 
+La revisión para la evaluación T2 incluye 49 pruebas automatizadas, pruebas de
+guards, login y CSRF, más una matriz de pruebas funcionales. Las evidencias se
+encuentran en [`docs/VALIDACION-RUBRICA-T2.md`](docs/VALIDACION-RUBRICA-T2.md),
+[`docs/PRUEBAS-SISTEMA-T2.md`](docs/PRUEBAS-SISTEMA-T2.md) y
+[`docs/DIAGRAMAS-SISTEMA-T2.md`](docs/DIAGRAMAS-SISTEMA-T2.md). La ficha de
+coevaluación está lista para completar en
+[`docs/COEVALUACION.md`](docs/COEVALUACION.md).
+
 ## MySQL y MySQL Workbench
 
 La base de datos se encuentra en `database/corazones_limenos.sql`. Incluye

@@ -110,6 +110,19 @@ export class AccessRules {
   static canAccess(role: UserRole | null | undefined, area: ProtectedArea): boolean {
     return Boolean(role && this.permissions[area].includes(role));
   }
+
+  /** Solo admite destinos internos que correspondan al rol autenticado. */
+  static safeReturnUrl(role: UserRole, returnUrl: string | null): string | null {
+    if (!returnUrl || !returnUrl.startsWith('/') || returnUrl.startsWith('//')) return null;
+    if (returnUrl === '/perfil') return returnUrl;
+    if (/^\/donar(?:\/detalle|\/entrega)?$/.test(returnUrl)) {
+      return role === 'donante' ? returnUrl : null;
+    }
+    const panel = `/panel/${role}`;
+    return returnUrl === panel || returnUrl === `${panel}/donaciones` || returnUrl === `${panel}/albergues`
+      ? returnUrl
+      : null;
+  }
 }
 
 /** Validaciones reutilizables del perfil y seguridad. */

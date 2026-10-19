@@ -11,7 +11,7 @@ export interface DatabaseBootstrap {
 }
 
 export class DatabaseApiError extends Error {
-  constructor(message: string, readonly status: number) {
+  constructor(message: string, readonly status: number, readonly code = '') {
     super(message);
     this.name = 'DatabaseApiError';
   }
@@ -22,7 +22,7 @@ export class DatabaseApi {
   private readonly endpoint = `${window.location.protocol}//${window.location.hostname || '127.0.0.1'}:8081/api.php`;
   private csrfToken = '';
 
-  private async request<T>(action: string, data?: unknown, timeout = 5000): Promise<T> {
+  private async request<T>(action: string, data?: unknown, timeout = 5000, retryCsrf = true): Promise<T> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
     try {
@@ -36,8 +36,14 @@ export class DatabaseApi {
         body: data === undefined ? undefined : JSON.stringify(data),
         signal: controller.signal,
       });
-      const result = await response.json().catch(() => ({})) as T & { error?: string };
-      if (!response.ok) throw new DatabaseApiError(result.error || `Error HTTP ${response.status}`, response.status);
+      const result = await response.json().catch(() => ({})) as T & { error?: string; code?: string };
+      if (!response.ok) {
+        if (data !== undefined && retryCsrf && result.code === 'CSRF_INVALID') {
+          await this.request<DatabaseBootstrap>('bootstrap', undefined, 1800, false);
+          return this.request<T>(action, data, timeout, false);
+        }
+        throw new DatabaseApiError(result.error || `Error HTTP ${response.status}`, response.status, result.code);
+      }
       const token = (result as T & { csrfToken?: string }).csrfToken;
       if (token) this.csrfToken = token;
       return result;

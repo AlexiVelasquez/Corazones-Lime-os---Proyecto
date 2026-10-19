@@ -46,13 +46,29 @@ Archivos principales:
 | CP-UNIT-026 | HU-SEG-04 | Restringir donaciones por rol | Alta | Sesión iniciada | Donante, albergue y admin | Solo accede donante | Solo accede donante | PASS |
 | CP-UNIT-027 | HU-SEG-04 | Separar paneles por rol | Alta | Sesión iniciada | Tres roles y tres paneles | Cada rol abre solo su panel | Resultado esperado | PASS |
 | CP-UNIT-028 | HU-PER-01 | Permitir perfil a usuarios autenticados | Media | Sesión iniciada | Tres roles | Los tres acceden a su perfil | Resultado esperado | PASS |
+| CP-UNIT-029 | HU-SEG-04 | Conservar retorno interno permitido | Alta | Login requerido | Perfil, donación y panel propio | Retorno aceptado | Resultado esperado | PASS |
+| CP-UNIT-030 | HU-SEG-04 | Bloquear retorno externo o de otro rol | Alta | Login requerido | URL externa y panel ajeno | Retorno rechazado | Resultado esperado | PASS |
+| CP-UNIT-031 | HU-SEG-04 | Redirigir anónimo al login | Alta | Sin sesión | `/perfil` | Login con `returnUrl` | Resultado esperado | PASS |
+| CP-UNIT-032 | HU-DON-01 | Autorizar ruta de donación | Alta | Sesión donante | `/donar` | Acceso permitido | Acceso permitido | PASS |
+| CP-UNIT-033 | HU-SEG-04 | Bloquear área de otro rol | Alta | Sesión donante | `/panel/admin` | Regreso al panel propio | Resultado esperado | PASS |
+| CP-UNIT-034 | HU-SEG-04 | Bloquear parámetro de rol alterado | Alta | Sesión donante | `role=admin` | Regreso al panel propio | Resultado esperado | PASS |
+| CP-UNIT-035 | HU-LOGIN-01 | Evitar login con sesión activa | Media | Sesión donante | `/ingresar` | Redirección al panel | Resultado esperado | PASS |
+| CP-UNIT-036 | HU-SEG-04 | Comprobar guards en rutas privadas | Alta | Configuración de rutas | Nueve rutas privadas | Todas tienen guard | Resultado esperado | PASS |
+| CP-UNIT-037 | HU-LOGIN-01 | Validar campos antes de autenticar | Alta | Formulario de login | Correo inválido y clave vacía | No llama a la API | Resultado esperado | PASS |
+| CP-UNIT-038 | HU-LOGIN-01 | Mostrar error de autenticación | Alta | Formulario completo | Contraseña incorrecta | Mensaje y sin navegación | Resultado esperado | PASS |
+| CP-UNIT-039 | HU-LOGIN-01 | Redirigir según rol | Alta | Credenciales válidas | Cuenta donante | Panel donante | Panel donante | PASS |
+| CP-UNIT-040 | HU-LOGIN-01 | Recuperar ruta autorizada | Alta | Login desde donación | `/donar/entrega` | Regresa al flujo | Resultado esperado | PASS |
+| CP-UNIT-041 | HU-SEG-04 | Impedir redirección abierta | Alta | Credenciales válidas | URL externa | Abre panel propio | Resultado esperado | PASS |
+| CP-UNIT-042 | HU-LOGIN-01 | Evitar doble envío | Alta | Login en curso | Dos envíos seguidos | Una solicitud | Una solicitud | PASS |
+| CP-UNIT-043 | HU-SEG-05 | Renovar CSRF expirado | Alta | Token expirado | Respuesta `CSRF_INVALID` | Renueva y reintenta una vez | Resultado esperado | PASS |
+| CP-UNIT-044 | HU-SEG-05 | No reintentar un 403 de rol | Alta | Rol sin permiso | Respuesta `FORBIDDEN` | Propaga el rechazo | Resultado esperado | PASS |
 
 ## Procedimiento de ejecución
 
 1. Abrir una terminal en la carpeta `Proyectocalidad`.
 2. Ejecutar `npm install` si las dependencias aún no están instaladas.
 3. Ejecutar `npm run test:unit`.
-4. Verificar que Vitest indique **33 pruebas** en estado `passed` (los casos
+4. Verificar que Vitest indique **49 pruebas** en estado `passed` (los casos
    parametrizados de CP-UNIT-005 se contabilizan por cada dato de entrada).
 
 ## Relación con TDD

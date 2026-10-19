@@ -161,4 +161,16 @@ describe('7. Pruebas de autorización de rutas', () => {
     expect(AccessRules.canAccess('albergue', 'profile')).toBe(true);
     expect(AccessRules.canAccess('admin', 'profile')).toBe(true);
   });
+
+  it('CP-UNIT-029 conserva únicamente retornos internos permitidos para el rol', () => {
+    expect(AccessRules.safeReturnUrl('donante', '/donar/entrega')).toBe('/donar/entrega');
+    expect(AccessRules.safeReturnUrl('albergue', '/perfil')).toBe('/perfil');
+    expect(AccessRules.safeReturnUrl('admin', '/panel/admin/donaciones')).toBe('/panel/admin/donaciones');
+  });
+
+  it('CP-UNIT-030 bloquea retornos externos o destinados a otro rol', () => {
+    expect(AccessRules.safeReturnUrl('donante', '//sitio-malicioso.test')).toBeNull();
+    expect(AccessRules.safeReturnUrl('albergue', '/panel/admin')).toBeNull();
+    expect(AccessRules.safeReturnUrl('admin', '/donar')).toBeNull();
+  });
 });

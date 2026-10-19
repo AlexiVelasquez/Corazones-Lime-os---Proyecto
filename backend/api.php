@@ -88,7 +88,7 @@ function require_csrf(): void
 {
     $provided = (string) ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
     if ($provided === '' || !hash_equals(csrf_token(), $provided)) {
-        respond(['error' => 'La solicitud de seguridad expiró. Recarga la página e inténtalo otra vez.'], 403);
+        respond(['error' => 'La solicitud de seguridad expiró. Recarga la página e inténtalo otra vez.', 'code' => 'CSRF_INVALID'], 403);
     }
 }
 
@@ -331,7 +331,7 @@ try {
         rate_limit('login', 8, 600);
         require_fields($data, ['email', 'password']);
         $email = strtolower(trim((string) $data['email']));
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen((string) $data['password']) > 128) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 160 || strlen((string) $data['password']) > 128) {
             respond(['error' => 'Correo o contraseña incorrectos.'], 401);
         }
         $statement = $db->prepare(
@@ -456,7 +456,7 @@ try {
         $description = text_value($data['description'], 'La descripción', 5, 300);
         if ($quantity === false) respond(['error' => 'Revisa la descripción y cantidad de la donación.'], 422);
         if (!in_array($data['method'], ['dropoff', 'pickup'], true)) respond(['error' => 'Método de entrega no permitido.'], 422);
-        if (!in_array($data['condition'] ?? 'nuevo', ['nuevo', 'como-nuevo', 'usado'], true)) respond(['error' => 'Estado de artículos no permitido.'], 422);
+        if (!in_array($data['condition'] ?? 'nuevo', ['nuevo', 'como nuevo', 'usado'], true)) respond(['error' => 'Estado de artículos no permitido.'], 422);
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $data['date']);
         if (!$date || $date->format('Y-m-d') !== $data['date']) respond(['error' => 'La fecha programada no es válida.'], 422);
         $shelterCheck = $db->prepare('SELECT COUNT(*) FROM albergues WHERE id = :id AND estado = "Aprobado"');
