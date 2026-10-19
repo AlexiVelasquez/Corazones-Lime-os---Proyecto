@@ -19,8 +19,8 @@ no abras app\index.html directamente.
 
 CUENTAS DE DEMOSTRACIÓN
 
-Donante:       donante@calidad.pe / Demo123!
-Albergue 1:    albergue@calidad.pe / Demo123!
-Albergue 2:    patitas@calidad.pe / Demo123!
-Albergue 3:    renacer@calidad.pe / Demo123!
-Administrador: admin@calidad.pe / Demo123!
+Donante:       donante@calidad.pe / 12345678
+Albergue 1:    albergue@calidad.pe / 12345678
+Albergue 2:    patitas@calidad.pe / 12345678
+Albergue 3:    renacer@calidad.pe / 12345678
+Administrador: admin@calidad.pe / 12345678

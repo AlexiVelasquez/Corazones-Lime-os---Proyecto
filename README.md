@@ -59,13 +59,13 @@ npm run build:portable
 
 | Rol | Correo | Contraseña |
 |---|---|---|
-| Donante | `donante@calidad.pe` | `Demo123!` |
-| Hogar de la Esperanza | `albergue@calidad.pe` | `Demo123!` |
-| Patitas Felices | `patitas@calidad.pe` | `Demo123!` |
-| Renacer - Adulto Mayor | `renacer@calidad.pe` | `Demo123!` |
-| Administrador | `admin@calidad.pe` | `Demo123!` |
+| Donante | `donante@calidad.pe` | `12345678` |
+| Hogar de la Esperanza | `albergue@calidad.pe` | `12345678` |
+| Patitas Felices | `patitas@calidad.pe` | `12345678` |
+| Renacer - Adulto Mayor | `renacer@calidad.pe` | `12345678` |
+| Administrador | `admin@calidad.pe` | `12345678` |
 
-En `/ingresar` puedes completar cualquiera de estas cuentas con un clic.
+En `/ingresar` escribe el correo de la cuenta que quieras probar y la contraseña indicada.
 
 ## Registro y roles
 
@@ -165,6 +165,10 @@ se migran automáticamente a `password_hash` al iniciar sesión.
 Los mapas solo aceptan coordenadas válidas y vuelven al centro de Lima si la
 base contiene una ubicación incompleta. Para una base importada antes de esta
 mejora, ejecuta una vez `database/migrations/003_google_maps_locations.sql`.
+
+Si la base ya estaba importada antes del cambio de claves de demostración,
+ejecuta una vez `database/migrations/004_test_accounts_password.sql` para que
+las cinco cuentas de prueba utilicen `12345678`.
 
 La matriz completa y las instrucciones de prueba están en
 [`docs/SEGURIDAD-Y-ROLES.md`](docs/SEGURIDAD-Y-ROLES.md).

@@ -14,7 +14,7 @@ describe('10. Sesión y protección CSRF del cliente', () => {
       .mockResolvedValueOnce(response(true, 200, { account: { id: 'carlos' }, csrfToken: 'token-sesion' }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await new DatabaseApi().login('donante@calidad.pe', 'Demo123!');
+    await new DatabaseApi().login('donante@calidad.pe', '12345678');
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls[1][0]).toContain('action=bootstrap');
@@ -24,7 +24,7 @@ describe('10. Sesión y protección CSRF del cliente', () => {
   it('CP-UNIT-044 no reintenta errores de autorización ajenos a CSRF', async () => {
     const fetchMock = vi.fn().mockResolvedValue(response(false, 403, { error: 'Rol sin permiso', code: 'FORBIDDEN' }));
     vi.stubGlobal('fetch', fetchMock);
-    await expect(new DatabaseApi().login('albergue@calidad.pe', 'Demo123!')).rejects.toMatchObject({ status: 403 });
+    await expect(new DatabaseApi().login('albergue@calidad.pe', '12345678')).rejects.toMatchObject({ status: 403 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

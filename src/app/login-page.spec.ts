@@ -7,7 +7,7 @@ import { Account, Store } from './store';
 const donor: Account = {
   id: 'carlos', role: 'donante', name: 'Carlos', surname: 'Mendoza',
   email: 'donante@calidad.pe', phone: '987654321', district: 'Miraflores',
-  password: 'Demo123!', notifications: [true, true, false],
+  password: '12345678', notifications: [true, true, false],
 };
 
 describe('9. Caso de uso de inicio de sesión', () => {

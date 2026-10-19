@@ -361,11 +361,11 @@ INSERT INTO usuarios
   (id, rol_id, distrito_id, nombres, apellidos, correo, telefono, clave_hash,
    notificar_impacto, notificar_campanas, notificar_resumen)
 VALUES
-  ('carlos', 1, 1, 'Carlos', 'Mendoza', 'donante@calidad.pe', '987654321', SHA2('Demo123!', 256), 1, 1, 0),
-  ('esperanza', 2, 4, 'Hogar de la Esperanza', '', 'albergue@calidad.pe', '987654322', SHA2('Demo123!', 256), 1, 1, 0),
-  ('patitas', 2, 5, 'Patitas Felices', '', 'patitas@calidad.pe', '987654324', SHA2('Demo123!', 256), 1, 1, 0),
-  ('renacer', 2, 3, 'Renacer - Adulto Mayor', '', 'renacer@calidad.pe', '987654325', SHA2('Demo123!', 256), 1, 1, 0),
-  ('admin', 3, 2, 'María', 'García', 'admin@calidad.pe', '987654323', SHA2('Demo123!', 256), 1, 1, 0);
+  ('carlos', 1, 1, 'Carlos', 'Mendoza', 'donante@calidad.pe', '987654321', SHA2('12345678', 256), 1, 1, 0),
+  ('esperanza', 2, 4, 'Hogar de la Esperanza', '', 'albergue@calidad.pe', '987654322', SHA2('12345678', 256), 1, 1, 0),
+  ('patitas', 2, 5, 'Patitas Felices', '', 'patitas@calidad.pe', '987654324', SHA2('12345678', 256), 1, 1, 0),
+  ('renacer', 2, 3, 'Renacer - Adulto Mayor', '', 'renacer@calidad.pe', '987654325', SHA2('12345678', 256), 1, 1, 0),
+  ('admin', 3, 2, 'María', 'García', 'admin@calidad.pe', '987654323', SHA2('12345678', 256), 1, 1, 0);
 
 INSERT INTO albergues
   (id, usuario_id, distrito_id, nombre, ruc, descripcion, direccion, aforo, estado, imagen, latitud, longitud)

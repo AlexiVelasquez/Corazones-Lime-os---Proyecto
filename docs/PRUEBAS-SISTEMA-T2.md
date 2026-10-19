@@ -29,9 +29,9 @@ Resultado de la revisión del 19 de octubre de 2026:
 
 | ID | Escenario | Datos o acción | Resultado esperado |
 |---|---|---|---|
-| SYS-01 | Login donante | `donante@calidad.pe` y `Demo123!` | Abre `/panel/donante`. |
-| SYS-02 | Login albergue | `albergue@calidad.pe` y `Demo123!` | Abre `/panel/albergue`. |
-| SYS-03 | Login administrador | `admin@calidad.pe` y `Demo123!` | Abre `/panel/admin`. |
+| SYS-01 | Login donante | `donante@calidad.pe` y `12345678` | Abre `/panel/donante`. |
+| SYS-02 | Login albergue | `albergue@calidad.pe` y `12345678` | Abre `/panel/albergue`. |
+| SYS-03 | Login administrador | `admin@calidad.pe` y `12345678` | Abre `/panel/admin`. |
 | SYS-04 | Credenciales inválidas | Contraseña incorrecta | Muestra error y no crea sesión. |
 | SYS-05 | Doble envío | Presionar Ingresar repetidamente | Se procesa una sola solicitud. |
 | SYS-06 | Donación completa | Juguete como nuevo, cantidad y entrega válidas | Registra la donación y muestra su código. |
