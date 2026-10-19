@@ -1,6 +1,6 @@
 import { Directive, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store, blankDraft, Role } from './store';
+import { Store, blankDraft } from './store';
 import { AccessRules, DonationRules, DonationStatusRules, ProfileRules } from './business-rules';
 
 @Directive()
@@ -61,7 +61,6 @@ export class PageBase {
     const safeReturn = this.s.user ? AccessRules.safeReturnUrl(this.s.user.role, dest) : null;
     this.go(safeReturn ?? this.s.panel);
   }
-  fill(role: Role) { const a = this.s.accounts.find(a => a.role === role)!; this.email = a.email; this.password = a.password; }
   async publish() {
     if (this.s.user?.role !== 'albergue') return;
     if (this.s.currentShelter?.status !== 'Aprobado') { this.s.notify('Tu albergue debe ser aprobado antes de publicar necesidades.'); return; }
