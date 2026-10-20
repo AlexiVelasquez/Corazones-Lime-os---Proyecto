@@ -16,6 +16,7 @@ describe('9. Caso de uso de inicio de sesión', () => {
   let page: LoginPage;
 
   beforeEach(() => {
+    sessionStorage.clear();
     store = {
       user: null,
       accounts: [donor],
@@ -48,7 +49,8 @@ describe('9. Caso de uso de inicio de sesión', () => {
     page.email = donor.email;
     page.password = 'Incorrecta123!';
     await page.login();
-    expect(page.loginError).toBe('Correo o contraseña incorrectos.');
+    expect(page.loginError).toContain('Correo o contraseña incorrectos.');
+    expect(page.loginError).toContain('2 intentos');
     expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
 
@@ -89,5 +91,18 @@ describe('9. Caso de uso de inicio de sesión', () => {
     finish(false);
     await Promise.all([first, second]);
     expect(page.loginLoading).toBe(false);
+  });
+
+  it('CP-UNIT-053 bloquea el login tras tres fallos y recomienda registrar una cuenta', async () => {
+    store.login.mockResolvedValue(false);
+    page.email = donor.email;
+    page.password = 'Incorrecta123!';
+    await page.login();
+    await page.login();
+    await page.login();
+    expect(page.loginLocked).toBe(true);
+    expect(page.loginError).toContain('registra una cuenta');
+    await page.login();
+    expect(store.login).toHaveBeenCalledTimes(3);
   });
 });

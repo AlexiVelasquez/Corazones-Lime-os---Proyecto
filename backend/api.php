@@ -92,7 +92,7 @@ function require_csrf(): void
     }
 }
 
-function rate_limit(string $bucket, int $maximum, int $windowSeconds): void
+function rate_limit(string $bucket, int $maximum, int $windowSeconds, string $message = 'Demasiados intentos. Espera unos minutos antes de volver a intentar.', string $code = 'RATE_LIMITED'): void
 {
     $now = time();
     $attempts = array_values(array_filter(
@@ -101,7 +101,7 @@ function rate_limit(string $bucket, int $maximum, int $windowSeconds): void
     ));
     if (count($attempts) >= $maximum) {
         header('Retry-After: ' . $windowSeconds);
-        respond(['error' => 'Demasiados intentos. Espera unos minutos antes de volver a intentar.'], 429);
+        respond(['error' => $message, 'code' => $code], 429);
     }
     $attempts[] = $now;
     $_SESSION['rate_limits'][$bucket] = $attempts;
@@ -358,7 +358,7 @@ try {
     require_csrf();
 
     if ($action === 'login') {
-        rate_limit('login', 8, 600);
+        rate_limit('login', 3, 600, 'Superaste el límite de 3 intentos. Si no tienes credenciales válidas, registra una cuenta.', 'LOGIN_LIMIT_REACHED');
         require_fields($data, ['email', 'password']);
         $email = strtolower(trim((string) $data['email']));
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 160 || strlen((string) $data['password']) > 128) {

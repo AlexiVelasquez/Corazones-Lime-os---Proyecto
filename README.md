@@ -92,6 +92,8 @@ La matriz completa de permisos y el flujo de aprobación se encuentran en
   administrativa de albergues.
 - Protección de rutas y permisos en el servidor para donantes, albergues y
   administradores.
+- Límite de tres intentos fallidos de inicio de sesión con orientación al
+  registro de una cuenta.
 - Mapas reales por albergue, sede y punto de recojo, con accesos directos para
   abrir la ubicación o calcular la ruta en Google Maps.
 
@@ -108,7 +110,7 @@ npm run test:unit
 
 Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/app/business-rules.spec.ts`. La documentación IEEE 829 se encuentra en `docs/pruebas-unitarias-ieee829.md`.
 
-La revisión para la evaluación T2 incluye 57 pruebas automatizadas, pruebas de
+La revisión para la evaluación T2 incluye 58 pruebas automatizadas, pruebas de
 guards, login y CSRF, más una matriz de pruebas funcionales. Las evidencias se
 encuentran en [`docs/VALIDACION-RUBRICA-T2.md`](docs/VALIDACION-RUBRICA-T2.md),
 [`docs/PRUEBAS-SISTEMA-T2.md`](docs/PRUEBAS-SISTEMA-T2.md) y

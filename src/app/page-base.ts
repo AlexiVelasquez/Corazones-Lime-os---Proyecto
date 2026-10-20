@@ -13,8 +13,11 @@ export class PageBase {
   contact = { name: '', email: '', subject: 'Consulta general', message: '' };
   profile = { ...this.s.user, notifications: [...(this.s.user?.notifications ?? [true, true, false])] };
   currentPassword = ''; newPassword = ''; repeatPassword = '';
-  email = ''; password = ''; loginError = '';
+  email = ''; password = '';
   loginLoading = false;
+  loginFailures = this.readLoginFailures();
+  loginLocked = this.loginFailures >= 3;
+  loginError = this.loginLocked ? 'Superaste el límite de 3 intentos. Si aún no tienes credenciales válidas, registra una cuenta.' : '';
   showPassword = false;
   filterStatus = 'Todos';
   get filteredDonations() { return this.s.donations.filter(d => this.filterStatus === 'Todos' || d.status === this.filterStatus); }
@@ -53,14 +56,33 @@ export class PageBase {
       return;
     }
     if (this.loginLoading) return;
+    if (this.loginLocked) {
+      this.loginError = 'Superaste el límite de 3 intentos. Registra una cuenta para continuar.';
+      return;
+    }
     this.loginLoading = true;
     const authenticated = await this.s.login(this.email.trim(), this.password);
     this.loginLoading = false;
-    if (!authenticated) { this.loginError = this.s.message() || 'Correo o contraseña incorrectos.'; return; }
+    if (!authenticated) {
+      const serverMessage = this.s.message();
+      const serverLocked = serverMessage.includes('límite de 3 intentos') || serverMessage.includes('registra una cuenta');
+      this.loginFailures = serverLocked ? 3 : Math.min(3, this.loginFailures + 1);
+      sessionStorage.setItem('calidad.loginFailures', String(this.loginFailures));
+      this.loginLocked = this.loginFailures >= 3;
+      const remaining = 3 - this.loginFailures;
+      this.loginError = this.loginLocked
+        ? 'Superaste el límite de 3 intentos. Si aún no tienes credenciales válidas, registra una cuenta.'
+        : `${serverMessage || 'Correo o contraseña incorrectos.'} Te ${remaining === 1 ? 'queda' : 'quedan'} ${remaining} intento${remaining === 1 ? '' : 's'}.`;
+      return;
+    }
+    this.loginFailures = 0;
+    this.loginLocked = false;
+    sessionStorage.removeItem('calidad.loginFailures');
     const dest = new URLSearchParams(location.search).get('returnUrl');
     const safeReturn = this.s.user ? AccessRules.safeReturnUrl(this.s.user.role, dest) : null;
     this.go(safeReturn ?? this.s.panel);
   }
+  private readLoginFailures(){const value=Number(sessionStorage.getItem('calidad.loginFailures')??0);return Number.isInteger(value)&&value>0?Math.min(3,value):0;}
   async publish() {
     if (this.s.user?.role !== 'albergue') return;
     if (this.s.currentShelter?.status !== 'Aprobado') { this.s.notify('Tu albergue debe ser aprobado antes de publicar necesidades.'); return; }
