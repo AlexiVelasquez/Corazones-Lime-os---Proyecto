@@ -15,9 +15,9 @@ export class PageBase {
   currentPassword = ''; newPassword = ''; repeatPassword = '';
   email = ''; password = '';
   loginLoading = false;
-  loginFailures = this.readLoginFailures();
-  loginLocked = this.loginFailures >= 3;
-  loginError = this.loginLocked ? 'Superaste el límite de 3 intentos. Si aún no tienes credenciales válidas, registra una cuenta.' : '';
+  loginFailures = 0;
+  loginLocked = false;
+  loginError = '';
   showPassword = false;
   filterStatus = 'Todos';
   get filteredDonations() { return this.s.donations.filter(d => this.filterStatus === 'Todos' || d.status === this.filterStatus); }
@@ -79,7 +79,6 @@ export class PageBase {
       const serverMessage = loginTimedOut ? 'La conexión tardó demasiado. Verifica que el servidor esté iniciado.' : this.s.message();
       const serverLocked = serverMessage.includes('límite de 3 intentos') || serverMessage.includes('registra una cuenta');
       this.loginFailures = serverLocked ? 3 : Math.min(3, this.loginFailures + 1);
-      sessionStorage.setItem('calidad.loginFailures', String(this.loginFailures));
       this.loginLocked = this.loginFailures >= 3;
       const remaining = 3 - this.loginFailures;
       this.loginError = this.loginLocked
@@ -89,12 +88,10 @@ export class PageBase {
     }
     this.loginFailures = 0;
     this.loginLocked = false;
-    sessionStorage.removeItem('calidad.loginFailures');
     const dest = new URLSearchParams(location.search).get('returnUrl');
     const safeReturn = this.s.user ? AccessRules.safeReturnUrl(this.s.user.role, dest) : null;
     this.go(safeReturn ?? this.s.panel);
   }
-  private readLoginFailures(){const value=Number(sessionStorage.getItem('calidad.loginFailures')??0);return Number.isInteger(value)&&value>0?Math.min(3,value):0;}
   async publish() {
     if (this.s.user?.role !== 'albergue') return;
     if (this.s.currentShelter?.status !== 'Aprobado') { this.s.notify('Tu albergue debe ser aprobado antes de publicar necesidades.'); return; }

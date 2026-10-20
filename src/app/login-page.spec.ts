@@ -128,4 +128,18 @@ describe('9. Caso de uso de inicio de sesión', () => {
     expect(page.loginError).toContain('tardó demasiado');
     vi.useRealTimers();
   });
+
+  it('CP-UNIT-056 restablece el límite visual al recargar el formulario', async () => {
+    store.login.mockResolvedValue(false);
+    page.email = donor.email;
+    page.password = 'Incorrecta123!';
+    await page.login();
+    await page.login();
+    await page.login();
+    expect(page.loginLocked).toBe(true);
+    const reloadedPage = TestBed.runInInjectionContext(() => new LoginPage());
+    expect(reloadedPage.loginFailures).toBe(0);
+    expect(reloadedPage.loginLocked).toBe(false);
+    expect(reloadedPage.loginError).toBe('');
+  });
 });
