@@ -110,7 +110,7 @@ npm run test:unit
 
 Las reglas del negocio y sus casos están en `src/app/business-rules.ts` y `src/app/business-rules.spec.ts`. La documentación IEEE 829 se encuentra en `docs/pruebas-unitarias-ieee829.md`.
 
-La revisión para la evaluación T2 incluye 58 pruebas automatizadas, pruebas de
+La revisión para la evaluación T2 incluye 60 pruebas automatizadas, pruebas de
 guards, login y CSRF, más una matriz de pruebas funcionales. Las evidencias se
 encuentran en [`docs/VALIDACION-RUBRICA-T2.md`](docs/VALIDACION-RUBRICA-T2.md),
 [`docs/PRUEBAS-SISTEMA-T2.md`](docs/PRUEBAS-SISTEMA-T2.md) y

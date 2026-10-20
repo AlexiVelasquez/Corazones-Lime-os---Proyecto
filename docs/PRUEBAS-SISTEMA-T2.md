@@ -21,7 +21,7 @@ permisos, guards reales de Angular, login, retorno seguro y renovación CSRF.
 Resultado de la revisión del 19 de octubre de 2026:
 
 - 5 archivos de pruebas aprobados.
-- 58 pruebas automatizadas aprobadas.
+- 60 pruebas automatizadas aprobadas.
 - Compilación de producción aprobada.
 - Sintaxis de `backend/api.php` aprobada.
 

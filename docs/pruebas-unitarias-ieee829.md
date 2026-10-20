@@ -65,13 +65,15 @@ Archivos principales:
 | CP-UNIT-051 | HU-ADM-01 | Crear cuenta administrativa | Alta | Sesión con rol administrador | Datos válidos | Cuenta admin creada | Resultado esperado | PASS |
 | CP-UNIT-052 | HU-ADM-01 | Bloquear alta admin por otro rol | Alta | Sesión con rol donante | Datos válidos | Operación rechazada | Resultado esperado | PASS |
 | CP-UNIT-053 | HU-LOGIN-01 | Limitar intentos fallidos | Alta | Formulario de login | Tres credenciales incorrectas | Bloqueo y enlace de registro | Resultado esperado | PASS |
+| CP-UNIT-054 | HU-LOGIN-01 | Recuperar el formulario ante fallo técnico | Alta | Formulario de login | API rechaza la solicitud | Botón habilitado y mensaje visible | Resultado esperado | PASS |
+| CP-UNIT-055 | HU-LOGIN-01 | Limitar espera de autenticación | Alta | Formulario de login | API no responde | Sale de Verificando y muestra error | Resultado esperado | PASS |
 
 ## Procedimiento de ejecución
 
 1. Abrir una terminal en la carpeta `Proyectocalidad`.
 2. Ejecutar `npm install` si las dependencias aún no están instaladas.
 3. Ejecutar `npm run test:unit`.
-4. Verificar que Vitest indique **58 pruebas** en estado `passed` (los casos
+4. Verificar que Vitest indique **60 pruebas** en estado `passed` (los casos
    parametrizados de CP-UNIT-005 se contabilizan por cada dato de entrada).
 
 ## Relación con TDD

@@ -61,10 +61,22 @@ export class PageBase {
       return;
     }
     this.loginLoading = true;
-    const authenticated = await this.s.login(this.email.trim(), this.password);
-    this.loginLoading = false;
+    let authenticated = false;
+    let loginTimedOut = false;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    try {
+      authenticated = await Promise.race([
+        this.s.login(this.email.trim(), this.password),
+        new Promise<boolean>(resolve => { timeoutId = setTimeout(() => { loginTimedOut = true; resolve(false); }, 6500); }),
+      ]);
+    } catch {
+      this.s.notify('No se pudo completar el inicio de sesión. Inténtalo nuevamente.');
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+      this.loginLoading = false;
+    }
     if (!authenticated) {
-      const serverMessage = this.s.message();
+      const serverMessage = loginTimedOut ? 'La conexión tardó demasiado. Verifica que el servidor esté iniciado.' : this.s.message();
       const serverLocked = serverMessage.includes('límite de 3 intentos') || serverMessage.includes('registra una cuenta');
       this.loginFailures = serverLocked ? 3 : Math.min(3, this.loginFailures + 1);
       sessionStorage.setItem('calidad.loginFailures', String(this.loginFailures));

@@ -54,7 +54,7 @@ export class DatabaseApi {
   }
 
   bootstrap() { return this.request<DatabaseBootstrap>('bootstrap', undefined, 1800); }
-  login(email: string, password: string) { return this.request<{ account: Account; csrfToken: string }>('login', { email, password }); }
+  login(email: string, password: string) { return this.request<{ account: Account; csrfToken: string }>('login', { email, password }, 2500); }
   register(registration: RegistrationData) { return this.request<{ account: Account; shelter?: Shelter; csrfToken: string }>('register', registration); }
   createAdmin(registration: AdminAccountData) { return this.request<{ account: Account }>('createAdmin', registration); }
   logout() { return this.request<{ ok: boolean }>('logout', {}); }

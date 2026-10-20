@@ -24,6 +24,7 @@ describe('9. Caso de uso de inicio de sesión', () => {
       panel: '/panel/donante',
       donations: [],
       login: vi.fn(),
+      notify: vi.fn((message: string) => store.message.set(message)),
     };
     router = { navigateByUrl: vi.fn().mockResolvedValue(true), navigate: vi.fn().mockResolvedValue(true) };
     TestBed.configureTestingModule({
@@ -104,5 +105,27 @@ describe('9. Caso de uso de inicio de sesión', () => {
     expect(page.loginError).toContain('registra una cuenta');
     await page.login();
     expect(store.login).toHaveBeenCalledTimes(3);
+  });
+
+  it('CP-UNIT-054 restablece el botón si la autenticación produce un error inesperado', async () => {
+    store.login.mockRejectedValue(new Error('Servidor no disponible'));
+    page.email = donor.email;
+    page.password = donor.password;
+    await page.login();
+    expect(page.loginLoading).toBe(false);
+    expect(page.loginError).toContain('No se pudo completar');
+  });
+
+  it('CP-UNIT-055 cancela visualmente una autenticación que no responde', async () => {
+    vi.useFakeTimers();
+    store.login.mockReturnValue(new Promise<boolean>(() => undefined));
+    page.email = donor.email;
+    page.password = donor.password;
+    const attempt = page.login();
+    await vi.advanceTimersByTimeAsync(6500);
+    await attempt;
+    expect(page.loginLoading).toBe(false);
+    expect(page.loginError).toContain('tardó demasiado');
+    vi.useRealTimers();
   });
 });
